@@ -1,43 +1,55 @@
-import { Image as ImageIcon } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 
-// Placeholder images for gallery - these would be replaced with actual community images
+// Gallery images with AI-generated placeholders
+import communityGathering from "@/assets/gallery/community-gathering.jpg";
+import boardMeeting from "@/assets/gallery/board-meeting.jpg";
+import culturalCelebration from "@/assets/gallery/cultural-celebration.jpg";
+import youthProgram from "@/assets/gallery/youth-program.jpg";
+import ramadanIftar from "@/assets/gallery/ramadan-iftar.jpg";
+import familyEvent from "@/assets/gallery/family-event.jpg";
+
 const galleryImages = [
   {
     id: 1,
     title: "Community Gathering",
     category: "Events",
-    placeholder: true,
+    image: communityGathering,
+    description: "Community members socializing at a local gathering",
   },
   {
     id: 2,
     title: "Board Meeting",
     category: "Organization",
-    placeholder: true,
+    image: boardMeeting,
+    description: "Board members planning and discussing community initiatives",
   },
   {
     id: 3,
     title: "Cultural Celebration",
     category: "Culture",
-    placeholder: true,
+    image: culturalCelebration,
+    description: "Joyful cultural event with traditional decorations",
   },
   {
     id: 4,
     title: "Youth Program",
     category: "Education",
-    placeholder: true,
+    image: youthProgram,
+    description: "Youth participating in educational activities",
   },
   {
     id: 5,
     title: "Ramadan Iftar",
     category: "Events",
-    placeholder: true,
+    image: ramadanIftar,
+    description: "Community iftar gathering with families sharing a meal",
   },
   {
     id: 6,
     title: "Family Event",
     category: "Community",
-    placeholder: true,
+    image: familyEvent,
+    description: "Multigenerational families spending time together",
   },
 ];
 
@@ -66,16 +78,20 @@ const Gallery = () => {
               {galleryImages.map((image, index) => (
                 <div
                   key={image.id}
-                  className="card-heritage overflow-hidden group"
-                  style={{ animationDelay: `${index * 100}ms` }}
+                  className="card-heritage overflow-hidden group hover-lift"
+                  style={{ 
+                    animationDelay: `${index * 100}ms`,
+                    opacity: 0,
+                    animation: `slideUp 0.6s ease-out ${index * 100}ms forwards`
+                  }}
                 >
-                  <div className="aspect-[4/3] bg-muted flex items-center justify-center">
-                    <div className="text-center p-6">
-                      <ImageIcon className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
-                      <p className="text-sm text-muted-foreground">
-                        Image Coming Soon
-                      </p>
-                    </div>
+                  <div className="aspect-[4/3] overflow-hidden">
+                    <img
+                      src={image.image}
+                      alt={image.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
                   </div>
                   <div className="p-4">
                     <span className="inline-block px-2 py-1 text-xs font-medium bg-primary/10 text-primary rounded mb-2">
@@ -84,19 +100,21 @@ const Gallery = () => {
                     <h3 className="font-heading text-lg font-semibold text-foreground">
                       {image.title}
                     </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {image.description}
+                    </p>
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Coming Soon Notice */}
-            <div className="mt-12 p-8 bg-muted rounded-lg text-center">
-              <ImageIcon className="h-12 w-12 text-primary mx-auto mb-4" />
+            {/* More Photos Notice */}
+            <div className="mt-12 p-8 bg-muted rounded-lg text-center animate-fade-in" style={{ animationDelay: "600ms" }}>
               <h3 className="font-heading text-xl font-semibold text-foreground mb-2">
                 More Photos Coming Soon
               </h3>
               <p className="text-muted-foreground max-w-lg mx-auto">
-                We're building our gallery with photos from community events, cultural celebrations, 
+                We're continuously adding new photos from community events, cultural celebrations, 
                 and special moments. Check back soon for updates!
               </p>
             </div>
