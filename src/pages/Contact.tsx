@@ -6,6 +6,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/layout/Layout";
+import { MotionSection, MotionCard } from "@/components/motion";
+import { motion } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -17,6 +20,7 @@ const Contact = () => {
     message: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const prefersReducedMotion = useReducedMotion();
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -81,14 +85,14 @@ const Contact = () => {
       {/* Hero Section */}
       <section className="bg-gradient-to-b from-olive-light to-background py-16 md:py-24">
         <div className="section-container">
-          <div className="max-w-3xl mx-auto text-center animate-slide-up">
+          <MotionSection className="max-w-3xl mx-auto text-center">
             <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground mb-6">
               Contact Us
             </h1>
             <p className="text-lg text-muted-foreground">
               We'd love to hear from you. Reach out with questions, ideas, or just to connect.
             </p>
-          </div>
+          </MotionSection>
         </div>
       </section>
 
@@ -98,7 +102,7 @@ const Contact = () => {
           <div className="max-w-5xl mx-auto">
             <div className="grid md:grid-cols-2 gap-12">
               {/* Contact Info */}
-              <div className="space-y-8">
+              <MotionSection variant="fadeUp" className="space-y-8">
                 <div>
                   <h2 className="font-heading text-2xl font-semibold text-foreground mb-4">
                     Get In Touch
@@ -110,10 +114,17 @@ const Contact = () => {
                 </div>
 
                 <div className="space-y-4">
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-full bg-primary/10">
+                  <motion.div
+                    className="flex items-start gap-4"
+                    whileHover={prefersReducedMotion ? {} : { x: 4 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <motion.div
+                      className="p-3 rounded-full bg-primary/10"
+                      whileHover={prefersReducedMotion ? {} : { scale: 1.1 }}
+                    >
                       <Mail className="h-5 w-5 text-primary" />
-                    </div>
+                    </motion.div>
                     <div>
                       <h3 className="font-medium text-foreground">Email</h3>
                       <a
@@ -123,20 +134,27 @@ const Contact = () => {
                         beiteenassociation.STL@gmail.com
                       </a>
                     </div>
-                  </div>
+                  </motion.div>
 
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-full bg-primary/10">
+                  <motion.div
+                    className="flex items-start gap-4"
+                    whileHover={prefersReducedMotion ? {} : { x: 4 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <motion.div
+                      className="p-3 rounded-full bg-primary/10"
+                      whileHover={prefersReducedMotion ? {} : { scale: 1.1 }}
+                    >
                       <MapPin className="h-5 w-5 text-primary" />
-                    </div>
+                    </motion.div>
                     <div>
                       <h3 className="font-medium text-foreground">Location</h3>
                       <p className="text-muted-foreground">St. Louis, Missouri</p>
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
 
-                <div className="p-6 bg-muted rounded-lg">
+                <MotionCard className="p-6 bg-muted rounded-lg">
                   <h3 className="font-heading text-lg font-semibold text-foreground mb-2">
                     Response Time
                   </h3>
@@ -144,99 +162,116 @@ const Contact = () => {
                     We aim to respond to all inquiries within 2 business days. 
                     For urgent matters, please indicate so in your message.
                   </p>
-                </div>
-              </div>
+                </MotionCard>
+              </MotionSection>
 
               {/* Contact Form */}
-              <div className="card-heritage p-8">
-                {isSubmitted ? (
-                  <div className="text-center py-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
-                      <CheckCircle className="h-8 w-8" />
-                    </div>
-                    <h3 className="font-heading text-xl font-semibold text-foreground mb-2">
-                      Thank You!
-                    </h3>
-                    <p className="text-muted-foreground mb-6">
-                      Your message has been sent successfully. A member of our team will 
-                      respond within 2 business days.
-                    </p>
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsSubmitted(false)}
+              <MotionSection variant="fadeUp" delay={0.2}>
+                <MotionCard className="card-heritage p-8">
+                  {isSubmitted ? (
+                    <motion.div
+                      className="text-center py-8"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3 }}
                     >
-                      Send Another Message
-                    </Button>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Name</Label>
-                      <Input
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        placeholder="Your full name"
-                        className={errors.name ? "border-destructive" : ""}
-                      />
-                      {errors.name && (
-                        <p className="text-sm text-destructive">{errors.name}</p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        placeholder="your@email.com"
-                        className={errors.email ? "border-destructive" : ""}
-                      />
-                      {errors.email && (
-                        <p className="text-sm text-destructive">{errors.email}</p>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="message">Message</Label>
-                      <Textarea
-                        id="message"
-                        name="message"
-                        value={formData.message}
-                        onChange={handleChange}
-                        placeholder="How can we help you?"
-                        rows={5}
-                        className={errors.message ? "border-destructive" : ""}
-                      />
-                      {errors.message && (
-                        <p className="text-sm text-destructive">{errors.message}</p>
-                      )}
-                      <p className="text-xs text-muted-foreground text-right">
-                        {formData.message.length}/1000
+                      <motion.div
+                        className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                      >
+                        <CheckCircle className="h-8 w-8" />
+                      </motion.div>
+                      <h3 className="font-heading text-xl font-semibold text-foreground mb-2">
+                        Thank You!
+                      </h3>
+                      <p className="text-muted-foreground mb-6">
+                        Your message has been sent successfully. A member of our team will 
+                        respond within 2 business days.
                       </p>
-                    </div>
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsSubmitted(false)}
+                      >
+                        Send Another Message
+                      </Button>
+                    </motion.div>
+                  ) : (
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">Name</Label>
+                        <Input
+                          id="name"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          placeholder="Your full name"
+                          className={errors.name ? "border-destructive" : ""}
+                        />
+                        {errors.name && (
+                          <p className="text-sm text-destructive">{errors.name}</p>
+                        )}
+                      </div>
 
-                    <Button
-                      type="submit"
-                      className="w-full btn-primary"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? (
-                        "Sending..."
-                      ) : (
-                        <>
-                          <Send className="mr-2 h-4 w-4" />
-                          Send Message
-                        </>
-                      )}
-                    </Button>
-                  </form>
-                )}
-              </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                          id="email"
+                          name="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          placeholder="your@email.com"
+                          className={errors.email ? "border-destructive" : ""}
+                        />
+                        {errors.email && (
+                          <p className="text-sm text-destructive">{errors.email}</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="message">Message</Label>
+                        <Textarea
+                          id="message"
+                          name="message"
+                          value={formData.message}
+                          onChange={handleChange}
+                          placeholder="How can we help you?"
+                          rows={5}
+                          className={errors.message ? "border-destructive" : ""}
+                        />
+                        {errors.message && (
+                          <p className="text-sm text-destructive">{errors.message}</p>
+                        )}
+                        <p className="text-xs text-muted-foreground text-right">
+                          {formData.message.length}/1000
+                        </p>
+                      </div>
+
+                      <motion.div
+                        whileHover={prefersReducedMotion ? {} : { y: -2 }}
+                        whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
+                      >
+                        <Button
+                          type="submit"
+                          className="w-full btn-primary"
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? (
+                            "Sending..."
+                          ) : (
+                            <>
+                              <Send className="mr-2 h-4 w-4" />
+                              Send Message
+                            </>
+                          )}
+                        </Button>
+                      </motion.div>
+                    </form>
+                  )}
+                </MotionCard>
+              </MotionSection>
             </div>
           </div>
         </div>
