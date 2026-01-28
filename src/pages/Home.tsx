@@ -67,8 +67,8 @@ const Home = () => {
             <MotionSection variant="scaleIn" delay={0.2}>
               <div className="relative mx-auto max-w-md">
                 <motion.div
-                  className="absolute -inset-4 bg-gradient-to-br from-primary/20 to-accent/20 rounded-3xl blur-2xl"
-                  animate={prefersReducedMotion ? {} : { scale: [1, 1.02, 1], opacity: [0.8, 1, 0.8] }}
+                  className="absolute -inset-4 bg-gradient-to-br from-primary/20 to-accent/20 rounded-3xl opacity-60"
+                  animate={prefersReducedMotion ? {} : { scale: [1, 1.02, 1], opacity: [0.5, 0.7, 0.5] }}
                   transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                 />
                 <img

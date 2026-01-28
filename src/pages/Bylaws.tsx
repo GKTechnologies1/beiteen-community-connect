@@ -1,9 +1,8 @@
-import { useState } from "react";
-import { FileText, Download, ChevronDown, ChevronUp } from "lucide-react";
+import { FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/layout/Layout";
 import { MotionSection, MotionCard } from "@/components/motion";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 // Full bylaws content structure
@@ -161,19 +160,11 @@ Amendments shall take effect immediately upon adoption unless otherwise specifie
 
 const Bylaws = () => {
   const prefersReducedMotion = useReducedMotion();
-  const [expandedSection, setExpandedSection] = useState<string | null>(null);
-
-  const toggleSection = (id: string) => {
-    setExpandedSection(expandedSection === id ? null : id);
-  };
 
   const scrollToSection = (id: string) => {
-    setExpandedSection(id);
     const element = document.getElementById(id);
     if (element) {
-      setTimeout(() => {
-        element.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 100);
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
@@ -197,105 +188,82 @@ const Bylaws = () => {
       <section className="py-16 md:py-24 bg-background">
         <div className="section-container">
           <div className="max-w-4xl mx-auto">
-            {/* Download Option & TOC */}
+            {/* Table of Contents & Download */}
             <MotionSection variant="scaleIn">
-              <div className="grid md:grid-cols-2 gap-6 mb-12">
-                {/* Download Card */}
-                <MotionCard className="card-heritage p-6">
-                  <div className="flex items-center gap-4">
-                    <motion.div
-                      className="p-3 rounded-full bg-primary/10"
-                      whileHover={prefersReducedMotion ? {} : { scale: 1.1, rotate: 5 }}
-                    >
-                      <FileText className="h-8 w-8 text-primary" />
-                    </motion.div>
-                    <div className="flex-1">
-                      <h2 className="font-heading text-lg font-semibold text-foreground">
-                        Download Document
-                      </h2>
-                      <p className="text-sm text-muted-foreground">
-                        Get a copy for your records
-                      </p>
-                    </div>
-                  </div>
-                  <motion.div
-                    className="mt-4"
-                    whileHover={prefersReducedMotion ? {} : { y: -2 }}
-                    whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
-                  >
-                    <Button asChild variant="outline" className="w-full">
-                      <a href="/documents/bylaws.docx" download>
-                        <Download className="mr-2 h-4 w-4" />
-                        Download Bylaws (DOCX)
-                      </a>
-                    </Button>
-                  </motion.div>
-                </MotionCard>
-
+              <div className="grid md:grid-cols-3 gap-6 mb-12">
                 {/* Table of Contents */}
-                <MotionCard className="card-heritage p-6">
+                <div className="md:col-span-2 bg-card border border-border rounded-lg p-6">
                   <h2 className="font-heading text-lg font-semibold text-foreground mb-4">
                     Table of Contents
                   </h2>
-                  <nav className="space-y-1 max-h-48 overflow-y-auto">
+                  <nav className="grid sm:grid-cols-2 gap-x-4 gap-y-1">
                     {bylawsContent.map((article, index) => (
                       <button
                         key={article.id}
                         onClick={() => scrollToSection(article.id)}
-                        className="block w-full text-left text-sm text-muted-foreground hover:text-primary transition-colors py-1 hover:pl-2 duration-200"
+                        className="text-left text-sm text-muted-foreground hover:text-primary transition-colors py-1.5 hover:pl-2 duration-200"
                       >
                         {index + 1}. {article.title.replace("Article ", "").replace(" – ", ": ")}
                       </button>
                     ))}
                   </nav>
+                </div>
+
+                {/* Download Card */}
+                <MotionCard className="card-heritage p-6 flex flex-col">
+                  <div className="flex items-center gap-3 mb-4">
+                    <motion.div
+                      className="p-2.5 rounded-full bg-primary/10"
+                      whileHover={prefersReducedMotion ? {} : { scale: 1.1, rotate: 5 }}
+                    >
+                      <FileText className="h-6 w-6 text-primary" />
+                    </motion.div>
+                    <div>
+                      <h3 className="font-heading text-base font-semibold text-foreground">
+                        Download
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        Get a copy
+                      </p>
+                    </div>
+                  </div>
+                  <motion.div
+                    className="mt-auto"
+                    whileHover={prefersReducedMotion ? {} : { y: -2 }}
+                    whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
+                  >
+                    <Button asChild variant="outline" size="sm" className="w-full">
+                      <a href="/documents/bylaws.docx" download>
+                        <Download className="mr-2 h-4 w-4" />
+                        DOCX
+                      </a>
+                    </Button>
+                  </motion.div>
                 </MotionCard>
               </div>
             </MotionSection>
 
-            {/* Bylaws Articles */}
-            <div className="space-y-4">
+            {/* Bylaws Articles - All Expanded */}
+            <div className="space-y-8">
               {bylawsContent.map((article, index) => (
                 <MotionSection key={article.id} delay={index * 0.05}>
-                  <div
+                  <article
                     id={article.id}
-                    className="bg-card border border-border rounded-lg overflow-hidden scroll-mt-24"
+                    className="bg-card border border-border rounded-lg p-6 md:p-8 scroll-mt-24"
                   >
-                    <button
-                      onClick={() => toggleSection(article.id)}
-                      className="w-full flex items-center justify-between p-5 text-left hover:bg-muted/50 transition-colors"
-                    >
-                      <h3 className="font-heading text-lg font-semibold text-foreground">
-                        {article.title}
-                      </h3>
-                      {expandedSection === article.id ? (
-                        <ChevronUp className="h-5 w-5 text-muted-foreground" />
-                      ) : (
-                        <ChevronDown className="h-5 w-5 text-muted-foreground" />
-                      )}
-                    </button>
-                    <AnimatePresence>
-                      {expandedSection === article.id && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.3, ease: "easeInOut" }}
-                        >
-                          <div className="px-5 pb-5 border-t border-border">
-                            <div className="pt-4 text-muted-foreground leading-relaxed whitespace-pre-line text-[15px]">
-                              {article.content}
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
+                    <h2 className="font-heading text-xl md:text-2xl font-semibold text-foreground mb-4 pb-3 border-b border-border">
+                      {article.title}
+                    </h2>
+                    <div className="text-muted-foreground leading-relaxed whitespace-pre-line text-[15px] md:text-base">
+                      {article.content}
+                    </div>
+                  </article>
                 </MotionSection>
               ))}
             </div>
 
             {/* Footer Note */}
-            <MotionSection delay={0.5} className="mt-8">
+            <MotionSection delay={0.5} className="mt-10">
               <div className="p-6 bg-primary/5 border border-primary/20 rounded-lg text-center">
                 <p className="text-sm text-foreground">
                   <strong>Last Updated:</strong> These bylaws were adopted by the membership 
