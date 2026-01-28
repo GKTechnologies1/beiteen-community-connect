@@ -12,6 +12,8 @@ import { motion } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { supabase } from "@/integrations/supabase/client";
 import zelleQR from "@/assets/zelle-qr.png";
+import { FAQ, donationFAQs } from "@/components/FAQ";
+import { TransparencyBlock } from "@/components/TransparencyBlock";
 
 const ZELLE_EMAIL = "beiteenassociation.stl@gmail.com";
 
@@ -394,6 +396,17 @@ const Donations = () => {
                   )}
                 </MotionCard>
               </MotionSection>
+            </div>
+
+            {/* Transparency Block */}
+            <TransparencyBlock className="mt-12" />
+
+            {/* FAQ Section */}
+            <div className="mt-16">
+              <FAQ 
+                items={donationFAQs} 
+                subtitle="Common questions about donating to Beiteen Association"
+              />
             </div>
           </div>
         </div>

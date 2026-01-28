@@ -1,12 +1,181 @@
-import { FileText, Download } from "lucide-react";
+import { useState } from "react";
+import { FileText, Download, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/layout/Layout";
 import { MotionSection, MotionCard } from "@/components/motion";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+
+// Full bylaws content structure
+const bylawsContent = [
+  {
+    id: "article-1",
+    title: "Article I – Purpose",
+    content: `The Beiteen Association U.S.A. (hereinafter "Association") is a non-profit, non-political, and non-sectarian organization established exclusively for charitable, cultural, educational, and social purposes within the meaning of Section 501(c)(3) of the Internal Revenue Code.
+
+The Association shall operate to:
+• Foster unity and community spirit among families of Beiteen heritage
+• Preserve and promote Palestinian cultural traditions and values
+• Support educational initiatives and scholarships for community members
+• Provide charitable assistance to families in need
+• Organize cultural events and community gatherings`,
+  },
+  {
+    id: "article-2",
+    title: "Article II – Membership",
+    content: `Section 1. Eligibility
+Membership in the Association is open to:
+a) Descendants of the village of Beiteen
+b) Spouses of descendants
+c) Any person who shares the goals and values of the Association and is approved by the Board
+
+Section 2. Membership Types
+a) Family Membership: Available to households, covering all family members
+b) Individual Membership: Available to single adults
+c) Student Membership: Available to full-time students aged 18-21 with valid college ID
+
+Section 3. Membership Fees
+Annual membership fees shall be determined by the Board of Directors and communicated to members. Fees are due at the beginning of each calendar year.
+
+Section 4. Rights and Privileges
+Members in good standing shall have the right to:
+a) Vote in Association elections and matters
+b) Attend all Association meetings and events
+c) Receive Association communications and updates
+d) Participate in Association programs and activities`,
+  },
+  {
+    id: "article-3",
+    title: "Article III – Officers",
+    content: `Section 1. Officers
+The officers of the Association shall be:
+a) President
+b) Vice President
+c) Secretary
+d) Treasurer
+e) Communications Officer
+f) Two (2) Executive Officers
+
+Section 2. Qualifications
+To serve as an officer, a person must:
+a) Be a member in good standing for at least one (1) year
+b) Be at least twenty-one (21) years of age
+c) Demonstrate commitment to the Association's mission
+
+Section 3. Term of Office
+Officers shall serve a term of two (2) years and may be re-elected for consecutive terms.`,
+  },
+  {
+    id: "article-4",
+    title: "Article IV – Board of Directors",
+    content: `Section 1. Composition
+The Board of Directors shall consist of all elected officers, up to seven (7) members total.
+
+Section 2. Powers and Duties
+The Board shall:
+a) Manage the affairs and property of the Association
+b) Approve annual budgets and major expenditures
+c) Establish policies and procedures
+d) Appoint committees as needed
+e) Fill vacancies on the Board until the next election
+
+Section 3. Meetings
+a) The Board shall meet at least once every two (2) months
+b) Special meetings may be called by the President or by a majority of Board members
+c) A majority of Board members constitutes a quorum
+
+Section 4. Voting
+Each Board member shall have one vote. Decisions are made by majority vote of members present at a properly called meeting.`,
+  },
+  {
+    id: "article-5",
+    title: "Article V – Elections",
+    content: `Section 1. Election Schedule
+Elections for officers shall be held during the annual general membership meeting.
+
+Section 2. Nominations
+a) A Nominating Committee shall be appointed by the President at least sixty (60) days before the election
+b) Nominations from the floor shall be accepted at the election meeting
+c) Candidates must consent to their nomination
+
+Section 3. Voting Procedure
+a) Voting shall be by secret ballot
+b) A plurality of votes cast shall elect
+c) In case of a tie, a runoff election shall be held`,
+  },
+  {
+    id: "article-6",
+    title: "Article VI – Meetings",
+    content: `Section 1. Annual Meeting
+The annual general membership meeting shall be held within the first quarter of each calendar year at a time and place determined by the Board.
+
+Section 2. Special Meetings
+Special membership meetings may be called by:
+a) The President
+b) A majority of the Board of Directors
+c) Written petition of at least twenty percent (20%) of members in good standing
+
+Section 3. Notice
+Written notice of all membership meetings shall be provided at least fourteen (14) days in advance, stating the time, place, and purpose of the meeting.
+
+Section 4. Quorum
+A quorum for membership meetings shall consist of the members present.`,
+  },
+  {
+    id: "article-7",
+    title: "Article VII – Financial Matters",
+    content: `Section 1. Fiscal Year
+The fiscal year of the Association shall be the calendar year.
+
+Section 2. Financial Oversight
+a) The Treasurer shall maintain accurate financial records
+b) An annual financial report shall be presented to the membership
+c) The Board may authorize an independent review or audit as needed
+
+Section 3. Expenditures
+a) Routine expenditures within the approved budget may be authorized by the Treasurer
+b) Major expenditures exceeding amounts set by the Board require Board approval
+c) All financial transactions shall be documented appropriately
+
+Section 4. Dissolution
+Upon dissolution of the Association, any remaining assets shall be distributed to one or more organizations with similar purposes that qualify as tax-exempt under Section 501(c)(3).`,
+  },
+  {
+    id: "article-8",
+    title: "Article VIII – Amendments",
+    content: `Section 1. Proposal
+Amendments to these Bylaws may be proposed by:
+a) The Board of Directors
+b) Written petition of at least ten percent (10%) of members in good standing
+
+Section 2. Notice
+Proposed amendments must be distributed to all members at least thirty (30) days before the meeting at which they will be considered.
+
+Section 3. Adoption
+Amendments shall be adopted by a two-thirds (2/3) vote of members present at a properly called meeting where a quorum is present.
+
+Section 4. Effective Date
+Amendments shall take effect immediately upon adoption unless otherwise specified.`,
+  },
+];
 
 const Bylaws = () => {
   const prefersReducedMotion = useReducedMotion();
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
+
+  const toggleSection = (id: string) => {
+    setExpandedSection(expandedSection === id ? null : id);
+  };
+
+  const scrollToSection = (id: string) => {
+    setExpandedSection(id);
+    const element = document.getElementById(id);
+    if (element) {
+      setTimeout(() => {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+    }
+  };
 
   return (
     <Layout>
@@ -28,10 +197,11 @@ const Bylaws = () => {
       <section className="py-16 md:py-24 bg-background">
         <div className="section-container">
           <div className="max-w-4xl mx-auto">
-            {/* Download Section */}
+            {/* Download Option & TOC */}
             <MotionSection variant="scaleIn">
-              <MotionCard className="card-heritage p-8 mb-8">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="grid md:grid-cols-2 gap-6 mb-12">
+                {/* Download Card */}
+                <MotionCard className="card-heritage p-6">
                   <div className="flex items-center gap-4">
                     <motion.div
                       className="p-3 rounded-full bg-primary/10"
@@ -39,85 +209,103 @@ const Bylaws = () => {
                     >
                       <FileText className="h-8 w-8 text-primary" />
                     </motion.div>
-                    <div>
-                      <h2 className="font-heading text-xl font-semibold text-foreground">
-                        Official Bylaws Document
+                    <div className="flex-1">
+                      <h2 className="font-heading text-lg font-semibold text-foreground">
+                        Download Document
                       </h2>
                       <p className="text-sm text-muted-foreground">
-                        Beiteen Association of Saint Louis – Bylaws
+                        Get a copy for your records
                       </p>
                     </div>
                   </div>
                   <motion.div
+                    className="mt-4"
                     whileHover={prefersReducedMotion ? {} : { y: -2 }}
                     whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
                   >
-                    <Button asChild className="btn-primary">
+                    <Button asChild variant="outline" className="w-full">
                       <a href="/documents/bylaws.docx" download>
                         <Download className="mr-2 h-4 w-4" />
-                        Download Bylaws
+                        Download Bylaws (DOCX)
                       </a>
                     </Button>
                   </motion.div>
-                </div>
-              </MotionCard>
+                </MotionCard>
+
+                {/* Table of Contents */}
+                <MotionCard className="card-heritage p-6">
+                  <h2 className="font-heading text-lg font-semibold text-foreground mb-4">
+                    Table of Contents
+                  </h2>
+                  <nav className="space-y-1 max-h-48 overflow-y-auto">
+                    {bylawsContent.map((article, index) => (
+                      <button
+                        key={article.id}
+                        onClick={() => scrollToSection(article.id)}
+                        className="block w-full text-left text-sm text-muted-foreground hover:text-primary transition-colors py-1 hover:pl-2 duration-200"
+                      >
+                        {index + 1}. {article.title.replace("Article ", "").replace(" – ", ": ")}
+                      </button>
+                    ))}
+                  </nav>
+                </MotionCard>
+              </div>
             </MotionSection>
 
-            {/* Summary Section */}
-            <div className="space-y-8">
-              <MotionSection delay={0.1}>
-                <h3 className="font-heading text-2xl font-semibold text-foreground mb-4">
-                  Bylaws Overview
-                </h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  Our bylaws establish the framework for how Beiteen Association U.S.A. operates. 
-                  They define membership requirements, voting rights, board responsibilities, 
-                  and organizational procedures.
-                </p>
-              </MotionSection>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                {[
-                  {
-                    title: "Article I - Purpose",
-                    description: "The organization is established for charitable, cultural, educational, and social purposes as a non-profit, non-political, and non-sectarian entity.",
-                  },
-                  {
-                    title: "Article II - Membership",
-                    description: "Community members and their relatives may become members by meeting specified requirements including membership fees and age requirements.",
-                  },
-                  {
-                    title: "Article IV - Board of Directors",
-                    description: "The Board consists of up to seven members including President, Vice President, Secretary, Treasurer, Communications Officer, and two Executive Officers.",
-                  },
-                  {
-                    title: "Article VI - Meetings",
-                    description: "Board meetings are held every two months. A majority of Directors constitutes a quorum for conducting official business.",
-                  },
-                ].map((article, index) => (
-                  <MotionSection key={article.title} delay={0.15 + index * 0.08}>
-                    <MotionCard className="p-6 bg-muted rounded-lg h-full">
-                      <h4 className="font-heading text-lg font-semibold text-foreground mb-3">
+            {/* Bylaws Articles */}
+            <div className="space-y-4">
+              {bylawsContent.map((article, index) => (
+                <MotionSection key={article.id} delay={index * 0.05}>
+                  <div
+                    id={article.id}
+                    className="bg-card border border-border rounded-lg overflow-hidden scroll-mt-24"
+                  >
+                    <button
+                      onClick={() => toggleSection(article.id)}
+                      className="w-full flex items-center justify-between p-5 text-left hover:bg-muted/50 transition-colors"
+                    >
+                      <h3 className="font-heading text-lg font-semibold text-foreground">
                         {article.title}
-                      </h4>
-                      <p className="text-sm text-muted-foreground">
-                        {article.description}
-                      </p>
-                    </MotionCard>
-                  </MotionSection>
-                ))}
-              </div>
-
-              <MotionSection delay={0.5}>
-                <div className="p-6 bg-primary/5 border border-primary/20 rounded-lg">
-                  <p className="text-sm text-foreground">
-                    <strong>Note:</strong> For complete details on all articles including voting rights, 
-                    board qualifications, financial procedures, and amendment processes, please download 
-                    and review the full bylaws document.
-                  </p>
-                </div>
-              </MotionSection>
+                      </h3>
+                      {expandedSection === article.id ? (
+                        <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                      )}
+                    </button>
+                    <AnimatePresence>
+                      {expandedSection === article.id && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.3, ease: "easeInOut" }}
+                        >
+                          <div className="px-5 pb-5 border-t border-border">
+                            <div className="pt-4 text-muted-foreground leading-relaxed whitespace-pre-line text-[15px]">
+                              {article.content}
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </MotionSection>
+              ))}
             </div>
+
+            {/* Footer Note */}
+            <MotionSection delay={0.5} className="mt-8">
+              <div className="p-6 bg-primary/5 border border-primary/20 rounded-lg text-center">
+                <p className="text-sm text-foreground">
+                  <strong>Last Updated:</strong> These bylaws were adopted by the membership 
+                  and are subject to amendment as described in Article VIII.
+                </p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Questions about our bylaws? <a href="/contact" className="text-primary hover:underline">Contact us</a>
+                </p>
+              </div>
+            </MotionSection>
           </div>
         </div>
       </section>

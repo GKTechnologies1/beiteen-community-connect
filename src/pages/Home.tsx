@@ -6,6 +6,8 @@ import logo from "@/assets/beiteen-logo.jpeg";
 import { MotionSection, MotionCard, ParallaxHero } from "@/components/motion";
 import { motion } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { LatestUpdates } from "@/components/LatestUpdates";
+import { HowYouCanHelp } from "@/components/HowYouCanHelp";
 
 const Home = () => {
   const prefersReducedMotion = useReducedMotion();
@@ -297,6 +299,18 @@ const Home = () => {
                 </motion.div>
               </div>
             </MotionSection>
+          </div>
+        </div>
+      </section>
+
+      {/* How You Can Help Section */}
+      <HowYouCanHelp className="py-16 md:py-24 bg-background" />
+
+      {/* Latest Updates Strip */}
+      <section className="py-12 bg-muted/30">
+        <div className="section-container">
+          <div className="max-w-lg mx-auto">
+            <LatestUpdates />
           </div>
         </div>
       </section>

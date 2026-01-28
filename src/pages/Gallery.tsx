@@ -1,5 +1,7 @@
+import { useState, useCallback } from "react";
 import Layout from "@/components/layout/Layout";
-import { MotionSection, MotionImage } from "@/components/motion";
+import { MotionSection } from "@/components/motion";
+import { motion } from "framer-motion";
 
 // Real gallery images
 import beiteen1991 from "@/assets/gallery/beiteen-1991.png";
@@ -55,6 +57,50 @@ const galleryImages = [
   },
 ];
 
+// Optimized lazy-loading image component
+const LazyImage = ({ 
+  src, 
+  alt, 
+  className 
+}: { 
+  src: string; 
+  alt: string; 
+  className?: string;
+}) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isInView, setIsInView] = useState(false);
+
+  const handleLoad = useCallback(() => {
+    setIsLoaded(true);
+  }, []);
+
+  return (
+    <motion.div 
+      className="relative w-full h-full overflow-hidden bg-muted"
+      onViewportEnter={() => setIsInView(true)}
+      viewport={{ once: true, margin: "100px" }}
+    >
+      {/* Skeleton placeholder */}
+      {!isLoaded && (
+        <div className="absolute inset-0 bg-muted animate-pulse" />
+      )}
+      
+      {isInView && (
+        <img
+          src={src}
+          alt={alt}
+          loading="lazy"
+          decoding="async"
+          onLoad={handleLoad}
+          className={`${className} transition-opacity duration-300 ${
+            isLoaded ? "opacity-100" : "opacity-0"
+          }`}
+        />
+      )}
+    </motion.div>
+  );
+};
+
 const Gallery = () => {
   return (
     <Layout>
@@ -78,14 +124,19 @@ const Gallery = () => {
           <div className="max-w-6xl mx-auto">
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {galleryImages.map((image, index) => (
-                <MotionSection key={image.id} delay={index * 0.08}>
-                  <div className="card-heritage overflow-hidden group">
-                    <MotionImage
-                      src={image.image}
-                      alt={image.title}
-                      className="w-full h-full object-cover transition-transform duration-500"
-                      containerClassName="aspect-[4/3]"
-                    />
+                <MotionSection key={image.id} delay={index * 0.05}>
+                  <motion.div 
+                    className="bg-card border border-border rounded-lg overflow-hidden group"
+                    whileHover={{ y: -4 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="aspect-[4/3] overflow-hidden">
+                      <LazyImage
+                        src={image.image}
+                        alt={image.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    </div>
                     <div className="p-4">
                       <span className="inline-block px-2 py-1 text-xs font-medium bg-primary/10 text-primary rounded mb-2">
                         {image.category}
@@ -97,13 +148,13 @@ const Gallery = () => {
                         {image.description}
                       </p>
                     </div>
-                  </div>
+                  </motion.div>
                 </MotionSection>
               ))}
             </div>
 
             {/* More Photos Notice */}
-            <MotionSection delay={0.5} className="mt-12">
+            <MotionSection delay={0.3} className="mt-12">
               <div className="p-8 bg-muted rounded-lg text-center">
                 <h3 className="font-heading text-xl font-semibold text-foreground mb-2">
                   More Photos Coming Soon
