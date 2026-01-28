@@ -9,6 +9,7 @@ import Layout from "@/components/layout/Layout";
 import { MotionSection, MotionCard } from "@/components/motion";
 import { motion } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { supabase } from "@/integrations/supabase/client";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -56,18 +57,31 @@ const Contact = () => {
 
     setIsSubmitting(true);
 
-    // Simulate form submission - in Phase 2 this would connect to a backend
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const { error } = await supabase.from("contact_submissions").insert({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        message: formData.message.trim(),
+      });
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    
-    toast({
-      title: "Message Sent!",
-      description: "Thank you for your inquiry. A member of our team will respond within 2 business days.",
-    });
+      if (error) throw error;
 
-    setFormData({ name: "", email: "", message: "" });
+      setIsSubmitted(true);
+      toast({
+        title: "Message Sent!",
+        description: "Thank you for your inquiry. A member of our team will respond within 2 business days.",
+      });
+      setFormData({ name: "", email: "", message: "" });
+    } catch (error) {
+      console.error("Error submitting contact form:", error);
+      toast({
+        title: "Submission Error",
+        description: "There was an error sending your message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (

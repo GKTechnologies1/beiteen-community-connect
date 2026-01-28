@@ -1,56 +1,57 @@
 import Layout from "@/components/layout/Layout";
 import { MotionSection, MotionImage } from "@/components/motion";
 
-// Gallery images with AI-generated placeholders
+// Real gallery images
+import beiteen1991 from "@/assets/gallery/beiteen-1991.png";
+import beiteenHistoric from "@/assets/gallery/beiteen-historic.png";
+// Placeholder images for categories without real photos yet
 import communityGathering from "@/assets/gallery/community-gathering.jpg";
 import boardMeeting from "@/assets/gallery/board-meeting.jpg";
 import culturalCelebration from "@/assets/gallery/cultural-celebration.jpg";
 import youthProgram from "@/assets/gallery/youth-program.jpg";
-import ramadanIftar from "@/assets/gallery/ramadan-iftar.jpg";
-import familyEvent from "@/assets/gallery/family-event.jpg";
 
 const galleryImages = [
   {
     id: 1,
-    title: "Community Gathering",
-    category: "Events",
-    image: communityGathering,
-    description: "Community members socializing at a local gathering",
+    title: "Beiteen Association 1991",
+    category: "Heritage",
+    image: beiteen1991,
+    description: "Historic photo from our community's early days in 1991",
   },
   {
     id: 2,
+    title: "Our History",
+    category: "Heritage",
+    image: beiteenHistoric,
+    description: "Celebrating our roots and the journey of our community",
+  },
+  {
+    id: 3,
+    title: "Community Gathering",
+    category: "Events",
+    image: communityGathering,
+    description: "Community members coming together for a local gathering",
+  },
+  {
+    id: 4,
     title: "Board Meeting",
     category: "Organization",
     image: boardMeeting,
     description: "Board members planning and discussing community initiatives",
   },
   {
-    id: 3,
+    id: 5,
     title: "Cultural Celebration",
     category: "Culture",
     image: culturalCelebration,
     description: "Joyful cultural event with traditional decorations",
   },
   {
-    id: 4,
+    id: 6,
     title: "Youth Program",
     category: "Education",
     image: youthProgram,
     description: "Youth participating in educational activities",
-  },
-  {
-    id: 5,
-    title: "Ramadan Iftar",
-    category: "Events",
-    image: ramadanIftar,
-    description: "Community iftar gathering with families sharing a meal",
-  },
-  {
-    id: 6,
-    title: "Family Event",
-    category: "Community",
-    image: familyEvent,
-    description: "Multigenerational families spending time together",
   },
 ];
 

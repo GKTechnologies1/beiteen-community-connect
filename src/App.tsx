@@ -9,6 +9,8 @@ import Mission from "./pages/Mission";
 import Board from "./pages/Board";
 import Bylaws from "./pages/Bylaws";
 import Gallery from "./pages/Gallery";
+import Membership from "./pages/Membership";
+import Donations from "./pages/Donations";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 
@@ -27,6 +29,8 @@ const App = () => (
           <Route path="/board" element={<Board />} />
           <Route path="/bylaws" element={<Bylaws />} />
           <Route path="/gallery" element={<Gallery />} />
+          <Route path="/membership" element={<Membership />} />
+          <Route path="/donations" element={<Donations />} />
           <Route path="/contact" element={<Contact />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
