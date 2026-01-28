@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
 import { MotionSection } from "@/components/motion";
 import { motion } from "framer-motion";
@@ -57,7 +57,7 @@ const galleryImages = [
   },
 ];
 
-// Optimized lazy-loading image component
+// Optimized lazy-loading image component using IntersectionObserver
 const LazyImage = ({ 
   src, 
   alt, 
@@ -69,20 +69,38 @@ const LazyImage = ({
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
+  const imgRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px", threshold: 0.01 }
+    );
+
+    if (imgRef.current) {
+      observer.observe(imgRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const handleLoad = useCallback(() => {
     setIsLoaded(true);
   }, []);
 
   return (
-    <motion.div 
+    <div 
+      ref={imgRef}
       className="relative w-full h-full overflow-hidden bg-muted"
-      onViewportEnter={() => setIsInView(true)}
-      viewport={{ once: true, margin: "100px" }}
     >
-      {/* Skeleton placeholder */}
+      {/* Solid skeleton placeholder - no blur */}
       {!isLoaded && (
-        <div className="absolute inset-0 bg-muted animate-pulse" />
+        <div className="absolute inset-0 bg-gradient-to-br from-muted to-muted-foreground/10 animate-pulse" />
       )}
       
       {isInView && (
@@ -97,7 +115,7 @@ const LazyImage = ({
           }`}
         />
       )}
-    </motion.div>
+    </div>
   );
 };
 
@@ -130,6 +148,7 @@ const Gallery = () => {
                     whileHover={{ y: -4 }}
                     transition={{ duration: 0.2 }}
                   >
+                    {/* Fixed aspect ratio container to prevent layout shift */}
                     <div className="aspect-[4/3] overflow-hidden">
                       <LazyImage
                         src={image.image}
