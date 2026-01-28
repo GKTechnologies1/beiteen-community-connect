@@ -14,7 +14,105 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      contact_submissions: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      donation_submissions: {
+        Row: {
+          acknowledged: boolean
+          created_at: string
+          donation_amount: number
+          email: string | null
+          id: string
+          intended_payment_date: string | null
+          is_anonymous: boolean
+          message: string | null
+          name: string | null
+          payment_verified: boolean
+        }
+        Insert: {
+          acknowledged?: boolean
+          created_at?: string
+          donation_amount: number
+          email?: string | null
+          id?: string
+          intended_payment_date?: string | null
+          is_anonymous?: boolean
+          message?: string | null
+          name?: string | null
+          payment_verified?: boolean
+        }
+        Update: {
+          acknowledged?: boolean
+          created_at?: string
+          donation_amount?: number
+          email?: string | null
+          id?: string
+          intended_payment_date?: string | null
+          is_anonymous?: boolean
+          message?: string | null
+          name?: string | null
+          payment_verified?: boolean
+        }
+        Relationships: []
+      }
+      membership_submissions: {
+        Row: {
+          acknowledged: boolean
+          created_at: string
+          email: string
+          full_name: string
+          household_notes: string | null
+          id: string
+          membership_type: string
+          payment_verified: boolean
+          phone: string | null
+        }
+        Insert: {
+          acknowledged?: boolean
+          created_at?: string
+          email: string
+          full_name: string
+          household_notes?: string | null
+          id?: string
+          membership_type: string
+          payment_verified?: boolean
+          phone?: string | null
+        }
+        Update: {
+          acknowledged?: boolean
+          created_at?: string
+          email?: string
+          full_name?: string
+          household_notes?: string | null
+          id?: string
+          membership_type?: string
+          payment_verified?: boolean
+          phone?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

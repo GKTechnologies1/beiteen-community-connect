@@ -10,6 +10,8 @@ const navigation = [
   { name: "Board", href: "/board" },
   { name: "Bylaws", href: "/bylaws" },
   { name: "Gallery", href: "/gallery" },
+  { name: "Membership", href: "/membership" },
+  { name: "Donate", href: "/donations" },
   { name: "Contact", href: "/contact" },
 ];
 
