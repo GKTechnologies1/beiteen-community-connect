@@ -337,7 +337,7 @@ const Membership = () => {
       {/* Membership Content */}
       <section className="py-16 md:py-24 bg-background">
         <div className="section-container">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             {isSubmitted ? (
               <MotionSection>
                 <MotionCard className="card-heritage p-8 md:p-12">
@@ -395,7 +395,7 @@ const Membership = () => {
                 </MotionCard>
               </MotionSection>
             ) : (
-              <div className="grid lg:grid-cols-3 gap-8">
+              <div className="grid lg:grid-cols-4 gap-8">
                 {/* Info Sidebar */}
                 <MotionSection variant="fadeUp" className="lg:col-span-1 space-y-6">
                   <MotionCard className="card-heritage p-6">
@@ -434,8 +434,8 @@ const Membership = () => {
                 </MotionSection>
 
                 {/* Form Section */}
-                <MotionSection variant="fadeUp" delay={0.2} className="lg:col-span-2">
-                  <MotionCard className="card-heritage p-6 md:p-8">
+                <MotionSection variant="fadeUp" delay={0.2} className="lg:col-span-3">
+                  <MotionCard className="card-heritage p-6 md:p-10">
                     <form onSubmit={handleSubmit} className="space-y-6">
                       {/* Family Name */}
                       <div className="space-y-2">

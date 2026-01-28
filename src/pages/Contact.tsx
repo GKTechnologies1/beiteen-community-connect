@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mail, MapPin, Send, CheckCircle } from "lucide-react";
+import { Mail, MapPin, Phone, Send, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +10,7 @@ import { MotionSection, MotionCard } from "@/components/motion";
 import { motion } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { supabase } from "@/integrations/supabase/client";
+import { isValidUSPhone } from "@/lib/validation";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -17,6 +18,7 @@ const Contact = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
+    phone: "",
     email: "",
     message: "",
   });
@@ -30,6 +32,12 @@ const Contact = () => {
       newErrors.name = "Name is required";
     } else if (formData.name.length > 100) {
       newErrors.name = "Name must be less than 100 characters";
+    }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone number is required";
+    } else if (!isValidUSPhone(formData.phone)) {
+      newErrors.phone = "Please enter a valid US phone number";
     }
 
     if (!formData.email.trim()) {
@@ -60,6 +68,7 @@ const Contact = () => {
     try {
       const { error } = await supabase.from("contact_submissions").insert({
         name: formData.name.trim(),
+        phone: formData.phone.trim(),
         email: formData.email.trim(),
         message: formData.message.trim(),
       });
@@ -71,7 +80,7 @@ const Contact = () => {
         title: "Message Sent!",
         description: "Thank you for your inquiry. A member of our team will respond within 2 business days.",
       });
-      setFormData({ name: "", email: "", message: "" });
+      setFormData({ name: "", phone: "", email: "", message: "" });
     } catch (error) {
       console.error("Error submitting contact form:", error);
       toast({
@@ -214,7 +223,7 @@ const Contact = () => {
                   ) : (
                     <form onSubmit={handleSubmit} className="space-y-6">
                       <div className="space-y-2">
-                        <Label htmlFor="name">Name</Label>
+                        <Label htmlFor="name">Name / الاسم *</Label>
                         <Input
                           id="name"
                           name="name"
@@ -229,7 +238,23 @@ const Contact = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
+                        <Label htmlFor="phone">Phone Number / رقم الهاتف *</Label>
+                        <Input
+                          id="phone"
+                          name="phone"
+                          type="tel"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          placeholder="(555) 123-4567"
+                          className={errors.phone ? "border-destructive" : ""}
+                        />
+                        {errors.phone && (
+                          <p className="text-sm text-destructive">{errors.phone}</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email / البريد الإلكتروني *</Label>
                         <Input
                           id="email"
                           name="email"
@@ -245,7 +270,7 @@ const Contact = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="message">Message</Label>
+                        <Label htmlFor="message">Message / الرسالة *</Label>
                         <Textarea
                           id="message"
                           name="message"
