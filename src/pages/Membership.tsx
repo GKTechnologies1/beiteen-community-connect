@@ -29,6 +29,7 @@ import zelleQR from "@/assets/zelle-qr.png";
 import { US_STATES } from "@/lib/us-states";
 import { isValidEmail, isValidUSPhone, isValidZelleContact, isValidZipCode } from "@/lib/validation";
 import { cn } from "@/lib/utils";
+import { FAQ, membershipFAQs } from "@/components/FAQ";
 
 const ZELLE_EMAIL = "beiteenassociation.stl@gmail.com";
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -780,6 +781,16 @@ const Membership = () => {
               </div>
             )}
           </div>
+
+          {/* FAQ Section */}
+          {!isSubmitted && (
+            <div className="mt-16">
+              <FAQ 
+                items={membershipFAQs} 
+                subtitle="Common questions about joining Beiteen Association"
+              />
+            </div>
+          )}
         </div>
       </section>
     </Layout>

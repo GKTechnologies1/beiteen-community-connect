@@ -63,6 +63,8 @@ export const MotionCard = ({
         rotateY,
         transformStyle: "preserve-3d",
         perspective: 1000,
+        willChange: "transform",
+        backfaceVisibility: "hidden",
       }}
       whileHover={{ scale, boxShadow: "0 10px 40px -10px hsl(30 15% 15% / 0.15)" }}
       transition={{ duration: 0.3, ease: "easeOut" }}
