@@ -80,36 +80,69 @@ export type Database = {
       membership_submissions: {
         Row: {
           acknowledged: boolean
+          city: string | null
+          college_id_urls: string[] | null
           created_at: string
           email: string
+          family_name: string | null
           full_name: string
+          head_dob: string | null
+          head_first_name: string | null
+          head_middle_name: string | null
+          household_members: string | null
           household_notes: string | null
           id: string
           membership_type: string
           payment_verified: boolean
           phone: string | null
+          state: string | null
+          street_address: string | null
+          zelle_contact: string | null
+          zip_code: string | null
         }
         Insert: {
           acknowledged?: boolean
+          city?: string | null
+          college_id_urls?: string[] | null
           created_at?: string
           email: string
+          family_name?: string | null
           full_name: string
+          head_dob?: string | null
+          head_first_name?: string | null
+          head_middle_name?: string | null
+          household_members?: string | null
           household_notes?: string | null
           id?: string
           membership_type: string
           payment_verified?: boolean
           phone?: string | null
+          state?: string | null
+          street_address?: string | null
+          zelle_contact?: string | null
+          zip_code?: string | null
         }
         Update: {
           acknowledged?: boolean
+          city?: string | null
+          college_id_urls?: string[] | null
           created_at?: string
           email?: string
+          family_name?: string | null
           full_name?: string
+          head_dob?: string | null
+          head_first_name?: string | null
+          head_middle_name?: string | null
+          household_members?: string | null
           household_notes?: string | null
           id?: string
           membership_type?: string
           payment_verified?: boolean
           phone?: string | null
+          state?: string | null
+          street_address?: string | null
+          zelle_contact?: string | null
+          zip_code?: string | null
         }
         Relationships: []
       }
