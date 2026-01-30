@@ -1,17 +1,18 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const EXCLUDED_ROUTES = ["/membership", "/donations", "/contact"];
-const IDLE_TIMEOUT = 7000; // 7 seconds
-const SCROLL_BOTTOM_THRESHOLD = 50; // px from bottom
+const IDLE_TIMEOUT = 6000; // 6 seconds (5-10 range)
+const NEAR_TOP_THRESHOLD = 100; // Consider "near top" if within 100px of top
 
 const ScrollHint = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isPageScrollable, setIsPageScrollable] = useState(false);
-  const [isAtBottom, setIsAtBottom] = useState(false);
+  const [isNearTop, setIsNearTop] = useState(true);
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const location = useLocation();
   const prefersReducedMotion = useReducedMotion();
   const { t } = useLanguage();
@@ -26,20 +27,41 @@ const ScrollHint = () => {
     return scrollable;
   }, []);
 
-  // Check if user is at bottom of page
-  const checkAtBottom = useCallback(() => {
+  // Check if user is near the top of the page
+  const checkNearTop = useCallback(() => {
     const scrollTop = window.scrollY;
-    const windowHeight = window.innerHeight;
-    const docHeight = document.documentElement.scrollHeight;
-    const atBottom = scrollTop + windowHeight >= docHeight - SCROLL_BOTTOM_THRESHOLD;
-    setIsAtBottom(atBottom);
-    return atBottom;
+    const nearTop = scrollTop <= NEAR_TOP_THRESHOLD;
+    setIsNearTop(nearTop);
+    return nearTop;
   }, []);
 
-  // Hide hint and reset idle timer
+  // Hide hint immediately
   const hideHint = useCallback(() => {
     setIsVisible(false);
   }, []);
+
+  // Clear any existing idle timer
+  const clearIdleTimer = useCallback(() => {
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current);
+      idleTimerRef.current = null;
+    }
+  }, []);
+
+  // Start idle timer to show hint
+  const startIdleTimer = useCallback(() => {
+    clearIdleTimer();
+
+    // Only start timer if conditions are met
+    if (!checkScrollable() || !checkNearTop()) return;
+
+    idleTimerRef.current = setTimeout(() => {
+      // Double-check conditions before showing
+      if (checkScrollable() && checkNearTop()) {
+        setIsVisible(true);
+      }
+    }, IDLE_TIMEOUT);
+  }, [checkScrollable, checkNearTop, clearIdleTimer]);
 
   // Scroll to show more content
   const handleClick = () => {
@@ -50,78 +72,79 @@ const ScrollHint = () => {
     hideHint();
   };
 
+  // Reset on route change
   useEffect(() => {
-    // Reset visibility on route change
     setIsVisible(false);
+    clearIdleTimer();
 
     // Check scrollability after route change (slight delay for DOM update)
     const timer = setTimeout(() => {
       checkScrollable();
-      checkAtBottom();
-    }, 100);
+      checkNearTop();
+      if (!isExcludedRoute) {
+        startIdleTimer();
+      }
+    }, 150);
 
-    return () => clearTimeout(timer);
-  }, [location.pathname, checkScrollable, checkAtBottom]);
+    return () => {
+      clearTimeout(timer);
+      clearIdleTimer();
+    };
+  }, [location.pathname, checkScrollable, checkNearTop, startIdleTimer, clearIdleTimer, isExcludedRoute]);
 
+  // Main effect for scroll and interaction handling
   useEffect(() => {
     if (isExcludedRoute) return;
 
-    let idleTimer: ReturnType<typeof setTimeout>;
-
-    const resetIdleTimer = () => {
+    const handleScroll = () => {
+      const nearTop = checkNearTop();
+      
+      // Hide immediately on any scroll
       hideHint();
-      clearTimeout(idleTimer);
+      clearIdleTimer();
 
-      // Only set new timer if page is scrollable and not at bottom
-      if (checkScrollable() && !checkAtBottom()) {
-        idleTimer = setTimeout(() => {
-          // Double-check conditions before showing
-          if (checkScrollable() && !checkAtBottom()) {
-            setIsVisible(true);
-          }
-        }, IDLE_TIMEOUT);
+      // If user scrolled back to top, start idle timer again
+      if (nearTop && checkScrollable()) {
+        startIdleTimer();
       }
     };
 
-    const handleScroll = () => {
-      checkAtBottom();
-      resetIdleTimer();
+    const handleInteraction = () => {
+      // On interaction, reset timer but don't hide (only scroll hides)
+      if (checkNearTop() && checkScrollable()) {
+        clearIdleTimer();
+        startIdleTimer();
+      }
     };
 
-    const handleInteraction = () => {
-      resetIdleTimer();
+    const handleResize = () => {
+      checkScrollable();
+      checkNearTop();
+      if (checkNearTop() && checkScrollable()) {
+        startIdleTimer();
+      }
     };
 
     // Initial setup
     checkScrollable();
-    checkAtBottom();
-    resetIdleTimer();
+    checkNearTop();
+    startIdleTimer();
 
     // Event listeners
     window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("mousemove", handleInteraction, { passive: true });
     window.addEventListener("keydown", handleInteraction, { passive: true });
-    window.addEventListener("touchstart", handleInteraction, { passive: true });
-    window.addEventListener("resize", () => {
-      checkScrollable();
-      checkAtBottom();
-    }, { passive: true });
+    window.addEventListener("resize", handleResize, { passive: true });
 
     return () => {
-      clearTimeout(idleTimer);
+      clearIdleTimer();
       window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("mousemove", handleInteraction);
       window.removeEventListener("keydown", handleInteraction);
-      window.removeEventListener("touchstart", handleInteraction);
-      window.removeEventListener("resize", () => {
-        checkScrollable();
-        checkAtBottom();
-      });
+      window.removeEventListener("resize", handleResize);
     };
-  }, [isExcludedRoute, hideHint, checkScrollable, checkAtBottom]);
+  }, [isExcludedRoute, hideHint, checkScrollable, checkNearTop, startIdleTimer, clearIdleTimer]);
 
-  // Don't render if excluded route, not scrollable, or at bottom
-  if (isExcludedRoute || !isPageScrollable || isAtBottom) {
+  // Don't render if excluded route, not scrollable, or not near top
+  if (isExcludedRoute || !isPageScrollable || !isNearTop) {
     return null;
   }
 
@@ -134,7 +157,7 @@ const ScrollHint = () => {
           exit={{ opacity: 0, y: 20 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
           onClick={handleClick}
-          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 cursor-pointer group"
+          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-2 cursor-pointer group"
           aria-label="Scroll down for more content"
         >
           {/* Mouse outline container */}
