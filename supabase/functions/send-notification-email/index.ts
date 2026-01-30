@@ -1,10 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-// Note: Resend free tier only allows sending to verified email
-// Once domain is verified at resend.com/domains, update PRIMARY_EMAIL to beiteenassociation.STL@gmail.com
-// and add CC_EMAIL as gktechnologies.stl@gmail.com
-const NOTIFICATION_EMAILS = ["gktechnologies.stl@gmail.com"];
+// Primary recipient for all form submissions
+const NOTIFICATION_EMAIL = "beiteenassociation.STL@gmail.com";
 
 // Logo URL - hosted publicly
 const LOGO_URL = "https://beiteen-community-connect.lovable.app/beiteen-logo.png";
@@ -429,7 +427,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const emailPayload: Record<string, unknown> = {
       from: "Beiteen Association <onboarding@resend.dev>",
-      to: NOTIFICATION_EMAILS,
+      to: [NOTIFICATION_EMAIL],
       subject: emailContent.subject,
       html: emailContent.html,
     };
@@ -439,7 +437,7 @@ const handler = async (req: Request): Promise<Response> => {
       emailPayload.reply_to = emailContent.replyTo;
     }
 
-    console.log("Sending email to:", NOTIFICATION_EMAILS.join(", "));
+    console.log("Sending email to:", NOTIFICATION_EMAIL);
     console.log("Reply-To:", emailContent.replyTo || "None");
 
     const emailResponse = await fetch("https://api.resend.com/emails", {
