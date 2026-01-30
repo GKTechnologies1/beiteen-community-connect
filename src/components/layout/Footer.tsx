@@ -7,6 +7,7 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
   const { t, isRTL } = useLanguage();
 
+  // Ordered for 2-column grid: Col1 (Home, Board, Gallery, Donate) | Col2 (Mission, Bylaws, Membership, Contact)
   const quickLinks = [
     { name: t("nav.home"), href: "/" },
     { name: t("nav.mission"), href: "/mission" },
