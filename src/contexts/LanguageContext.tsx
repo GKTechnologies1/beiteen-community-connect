@@ -1,3 +1,4 @@
+// Language Context for i18n support - EN/AR
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 type Language = "en" | "ar";
