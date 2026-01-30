@@ -1,7 +1,9 @@
+import { Link } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { MotionSection } from "@/components/motion";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-// Full bylaws content structure
+// Full bylaws content structure (English only - legal document)
 const bylawsContent = [
   {
     id: "article-1",
@@ -155,6 +157,8 @@ Amendments shall take effect immediately upon adoption unless otherwise specifie
 ];
 
 const Bylaws = () => {
+  const { t, isRTL } = useLanguage();
+
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
@@ -167,12 +171,12 @@ const Bylaws = () => {
       {/* Hero Section */}
       <section className="bg-gradient-to-b from-olive-light to-background py-16 md:py-24">
         <div className="section-container">
-          <MotionSection className="max-w-3xl mx-auto text-center">
+          <MotionSection className={`max-w-3xl mx-auto text-center ${isRTL ? 'text-right' : ''}`}>
             <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground mb-6">
-              Bylaws
+              {t("bylaws.title")}
             </h1>
             <p className="text-lg text-muted-foreground">
-              The governing rules and regulations of Beiteen Association U.S.A.
+              {t("bylaws.subtitle")}
             </p>
           </MotionSection>
         </div>
@@ -184,16 +188,16 @@ const Bylaws = () => {
           <div className="max-w-4xl mx-auto">
             {/* Table of Contents */}
             <MotionSection variant="scaleIn">
-              <div className="bg-card border border-border rounded-lg p-6 mb-12">
+              <div className={`bg-card border border-border rounded-lg p-6 mb-12 ${isRTL ? 'text-right' : ''}`}>
                 <h2 className="font-heading text-lg font-semibold text-foreground mb-4">
-                  Table of Contents
+                  {t("bylaws.toc")}
                 </h2>
                 <nav className="grid sm:grid-cols-2 gap-x-6 gap-y-1">
                   {bylawsContent.map((article, index) => (
                     <button
                       key={article.id}
                       onClick={() => scrollToSection(article.id)}
-                      className="text-left text-sm text-muted-foreground hover:text-primary transition-colors py-1.5 hover:pl-2 duration-200"
+                      className={`text-sm text-muted-foreground hover:text-primary transition-colors py-1.5 duration-200 ${isRTL ? 'text-right hover:pr-2' : 'text-left hover:pl-2'}`}
                     >
                       {index + 1}. {article.title.replace("Article ", "").replace(" – ", ": ")}
                     </button>
@@ -208,7 +212,7 @@ const Bylaws = () => {
                 <MotionSection key={article.id} delay={index * 0.05}>
                   <article
                     id={article.id}
-                    className="bg-card border border-border rounded-lg p-6 md:p-8 scroll-mt-24"
+                    className={`bg-card border border-border rounded-lg p-6 md:p-8 scroll-mt-24 ${isRTL ? 'text-right' : ''}`}
                   >
                     <h2 className="font-heading text-xl md:text-2xl font-semibold text-foreground mb-4 pb-3 border-b border-border">
                       {article.title}
@@ -223,13 +227,12 @@ const Bylaws = () => {
 
             {/* Footer Note */}
             <MotionSection delay={0.5} className="mt-10">
-              <div className="p-6 bg-primary/5 border border-primary/20 rounded-lg text-center">
+              <div className={`p-6 bg-primary/5 border border-primary/20 rounded-lg text-center ${isRTL ? 'text-right' : ''}`}>
                 <p className="text-sm text-foreground">
-                  <strong>Last Updated:</strong> These bylaws were adopted by the membership 
-                  and are subject to amendment as described in Article VIII.
+                  <strong>{t("bylaws.lastUpdated")}</strong> {t("bylaws.lastUpdatedNote")}
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Questions about our bylaws? <a href="/contact" className="text-primary hover:underline">Contact us</a>
+                  {t("bylaws.questions")} <Link to="/contact" className="text-primary hover:underline">{t("bylaws.contactUs")}</Link>
                 </p>
               </div>
             </MotionSection>

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const EXCLUDED_ROUTES = ["/membership", "/donations", "/contact"];
 const IDLE_TIMEOUT = 7000; // 7 seconds
@@ -13,6 +14,7 @@ const ScrollHint = () => {
   const [isAtBottom, setIsAtBottom] = useState(false);
   const location = useLocation();
   const prefersReducedMotion = useReducedMotion();
+  const { t } = useLanguage();
 
   // Check if current route is excluded
   const isExcludedRoute = EXCLUDED_ROUTES.includes(location.pathname);
@@ -163,7 +165,7 @@ const ScrollHint = () => {
 
           {/* Scroll label */}
           <span className="text-[10px] font-medium text-foreground/40 group-hover:text-primary/70 transition-colors duration-300 tracking-widest uppercase">
-            More
+            {t("common.more")}
           </span>
 
           {/* Subtle pulse ring - only on non-reduced motion */}
