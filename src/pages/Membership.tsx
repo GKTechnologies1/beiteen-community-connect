@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Users, CheckCircle, Upload, X, Calendar } from "lucide-react";
+import { Users, CheckCircle, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,13 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/layout/Layout";
 import { MotionSection, MotionCard } from "@/components/motion";
@@ -28,8 +21,8 @@ import { supabase } from "@/integrations/supabase/client";
 import zelleQR from "@/assets/zelle-qr.png";
 import { US_STATES } from "@/lib/us-states";
 import { isValidEmail, isValidUSPhone, isValidZelleContact, isValidZipCode } from "@/lib/validation";
-import { cn } from "@/lib/utils";
 import { FAQ, membershipFAQs } from "@/components/FAQ";
+import { DOBPicker } from "@/components/DOBPicker";
 
 const ZELLE_EMAIL = "beiteenassociation.stl@gmail.com";
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -496,36 +489,18 @@ const Membership = () => {
                         <Label>
                           Head of Household Date of Birth / تاريخ ميلاد رب الأسرة *
                         </Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full justify-start text-left font-normal",
-                                !formData.headDob && "text-muted-foreground",
-                                errors.headDob && "border-destructive"
-                              )}
-                            >
-                              <Calendar className="mr-2 h-4 w-4" />
-                              {formData.headDob ? format(formData.headDob, "PPP") : "Select date of birth"}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <CalendarComponent
-                              mode="single"
-                              selected={formData.headDob}
-                              onSelect={(date) => {
-                                setFormData(prev => ({ ...prev, headDob: date }));
-                                if (errors.headDob) {
-                                  setErrors(prev => ({ ...prev, headDob: "" }));
-                                }
-                              }}
-                              disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                              initialFocus
-                              className={cn("p-3 pointer-events-auto")}
-                            />
-                          </PopoverContent>
-                        </Popover>
+                        <DOBPicker
+                          value={formData.headDob}
+                          onChange={(date) => {
+                            setFormData(prev => ({ ...prev, headDob: date }));
+                            if (errors.headDob) {
+                              setErrors(prev => ({ ...prev, headDob: "" }));
+                            }
+                          }}
+                          error={!!errors.headDob}
+                          minYear={1920}
+                          maxYear={new Date().getFullYear()}
+                        />
                         {errors.headDob && (
                           <p className="text-sm text-destructive">{errors.headDob}</p>
                         )}

@@ -82,7 +82,7 @@ const Footer = () => {
             {/* Social Media */}
             <div className={`flex gap-4 mt-6 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/share/1CFWHPMtoJ/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors"
@@ -91,7 +91,7 @@ const Footer = () => {
                 <Facebook className="h-5 w-5" />
               </a>
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/beiteenassociation_stl_?igsh=MTZnYzNldWVmbjA5aQ=="
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors"
@@ -100,7 +100,7 @@ const Footer = () => {
                 <Instagram className="h-5 w-5" />
               </a>
               <a
-                href="https://wa.me/1234567890"
+                href="https://chat.whatsapp.com/H2eBYlivUw32PnZivmvlse?mode=gi_t"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 transition-colors"
