@@ -375,7 +375,7 @@ const Home = () => {
               whileHover={prefersReducedMotion ? {} : { y: -2, scale: 1.02 }}
               whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
             >
-              <Button asChild size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-medium">
+              <Button asChild size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-medium h-12 px-8">
                 <Link to="/membership">{t("home.join.memberBtn")}</Link>
               </Button>
             </motion.div>
@@ -383,7 +383,7 @@ const Home = () => {
               whileHover={prefersReducedMotion ? {} : { y: -2, scale: 1.02 }}
               whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
             >
-              <Button asChild size="lg" variant="outline" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10">
+              <Button asChild size="lg" className="bg-transparent border-2 border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10 font-medium h-12 px-8">
                 <Link to="/donations">{t("home.join.donateBtn")}</Link>
               </Button>
             </motion.div>

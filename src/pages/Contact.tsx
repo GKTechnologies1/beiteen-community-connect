@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { SocialLinks } from "@/components/SocialLinks";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -167,6 +168,12 @@ const Contact = () => {
                       <p className="text-muted-foreground">St. Louis, Missouri</p>
                     </div>
                   </motion.div>
+                </div>
+
+                {/* Social Media Links */}
+                <div className={isRTL ? 'text-right' : ''}>
+                  <h3 className="font-medium text-foreground mb-3">{t("footer.connect")}</h3>
+                  <SocialLinks variant="primary" className={isRTL ? 'justify-end' : ''} />
                 </div>
 
                 <MotionCard className={`p-6 bg-muted rounded-lg ${isRTL ? 'text-right' : ''}`}>
