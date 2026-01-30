@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { LatestUpdates } from "@/components/LatestUpdates";
 import { HowYouCanHelp } from "@/components/HowYouCanHelp";
+import ScrollIndicator from "@/components/ScrollIndicator";
 
 const Home = () => {
   const prefersReducedMotion = useReducedMotion();
@@ -80,11 +81,17 @@ const Home = () => {
             </MotionSection>
           </div>
         </ParallaxHero>
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
+        
+        {/* Scroll Indicator - Desktop only */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
+          <ScrollIndicator targetId="core-values" />
+        </div>
+        
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent pointer-events-none" />
       </section>
 
       {/* Values Section */}
-      <section className="py-16 md:py-24 bg-background">
+      <section id="core-values" className="py-16 md:py-24 bg-background scroll-mt-20">
         <div className="section-container">
           <MotionSection className="text-center max-w-2xl mx-auto mb-12">
             <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground mb-4">
