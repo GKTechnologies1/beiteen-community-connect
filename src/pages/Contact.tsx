@@ -12,6 +12,7 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SocialLinks } from "@/components/SocialLinks";
+import { sendNotificationEmail } from "@/lib/email-notifications";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -61,13 +62,18 @@ const Contact = () => {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.from("contact_submissions").insert({
+      const submissionData = {
         name: formData.name.trim(),
         email: formData.email.trim(),
         message: formData.message.trim(),
-      });
+      };
+
+      const { error } = await supabase.from("contact_submissions").insert(submissionData);
 
       if (error) throw error;
+
+      // Send email notification (don't block on failure)
+      sendNotificationEmail("contact", submissionData).catch(console.error);
 
       setIsSubmitted(true);
       toast({

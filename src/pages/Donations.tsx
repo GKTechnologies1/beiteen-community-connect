@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import zelleQR from "@/assets/zelle-qr.png";
 import { FAQ, donationFAQs } from "@/components/FAQ";
 import { TransparencyBlock } from "@/components/TransparencyBlock";
+import { sendNotificationEmail } from "@/lib/email-notifications";
 
 const ZELLE_EMAIL = "beiteenassociation.stl@gmail.com";
 
@@ -71,7 +72,7 @@ const Donations = () => {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.from("donation_submissions").insert({
+      const submissionData = {
         name: formData.name.trim() || null,
         email: formData.email.trim() || null,
         is_anonymous: formData.isAnonymous,
@@ -79,9 +80,14 @@ const Donations = () => {
         intended_payment_date: formData.intendedPaymentDate || null,
         message: formData.message.trim() || null,
         acknowledged: formData.acknowledged,
-      });
+      };
+
+      const { error } = await supabase.from("donation_submissions").insert(submissionData);
 
       if (error) throw error;
+
+      // Send email notification (don't block on failure)
+      sendNotificationEmail("donation", submissionData).catch(console.error);
 
       setIsSubmitted(true);
       toast({

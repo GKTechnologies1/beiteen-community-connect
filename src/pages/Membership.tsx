@@ -23,6 +23,7 @@ import { US_STATES } from "@/lib/us-states";
 import { isValidEmail, isValidUSPhone, isValidZelleContact, isValidZipCode } from "@/lib/validation";
 import { FAQ, membershipFAQs } from "@/components/FAQ";
 import { DOBPicker } from "@/components/DOBPicker";
+import { sendNotificationEmail } from "@/lib/email-notifications";
 
 const ZELLE_EMAIL = "beiteenassociation.stl@gmail.com";
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -235,7 +236,7 @@ const Membership = () => {
         collegeIdUrls = await uploadFiles();
       }
 
-      const { error } = await supabase.from("membership_submissions").insert({
+      const submissionData = {
         full_name: `${formData.headFirstName} ${formData.headMiddleName} ${formData.familyName}`.trim(),
         family_name: formData.familyName.trim(),
         head_first_name: formData.headFirstName.trim(),
@@ -253,9 +254,14 @@ const Membership = () => {
         zelle_contact: formData.zelleContact.trim(),
         membership_type: "household",
         acknowledged: formData.acknowledged,
-      });
+      };
+
+      const { error } = await supabase.from("membership_submissions").insert(submissionData);
 
       if (error) throw error;
+
+      // Send email notification (don't block on failure)
+      sendNotificationEmail("membership", submissionData).catch(console.error);
 
       setIsSubmitted(true);
       toast({
