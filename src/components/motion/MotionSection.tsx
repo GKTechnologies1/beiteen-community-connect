@@ -1,5 +1,5 @@
 import { motion, useInView, Variants } from "framer-motion";
-import { forwardRef, useRef, ReactNode } from "react";
+import { useRef, ReactNode } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface MotionSectionProps {
@@ -31,48 +31,40 @@ const reducedVariants: Variants = {
   visible: { opacity: 1 },
 };
 
-export const MotionSection = forwardRef<HTMLDivElement, MotionSectionProps>(
-  (
-    {
-      children,
-      className = "",
-      variant = "fadeUp",
-      delay = 0,
-      staggerChildren = false,
-      staggerDelay = 0.08,
-    },
-    forwardedRef
-  ) => {
-    const internalRef = useRef<HTMLDivElement>(null);
-    const ref = (forwardedRef as React.RefObject<HTMLDivElement>) || internalRef;
-    const isInView = useInView(ref, { once: true, margin: "-50px" });
-    const prefersReducedMotion = useReducedMotion();
+export const MotionSection = ({
+  children,
+  className = "",
+  variant = "fadeUp",
+  delay = 0,
+  staggerChildren = false,
+  staggerDelay = 0.08,
+}: MotionSectionProps) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
+  const prefersReducedMotion = useReducedMotion();
 
-    const selectedVariants = prefersReducedMotion ? reducedVariants : variants[variant];
+  const selectedVariants = prefersReducedMotion ? reducedVariants : variants[variant];
 
-    return (
-      <motion.div
-        ref={ref}
-        initial="hidden"
-        animate={isInView ? "visible" : "hidden"}
-        variants={selectedVariants}
-        transition={{
-          duration: prefersReducedMotion ? 0.2 : 0.5,
-          delay,
-          ease: [0.25, 0.46, 0.45, 0.94],
-          ...(staggerChildren && {
-            staggerChildren: staggerDelay,
-          }),
-        }}
-        className={className}
-      >
-        {children}
-      </motion.div>
-    );
-  }
-);
-
-MotionSection.displayName = "MotionSection";
+  return (
+    <motion.div
+      ref={ref}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      variants={selectedVariants}
+      transition={{
+        duration: prefersReducedMotion ? 0.2 : 0.5,
+        delay,
+        ease: [0.25, 0.46, 0.45, 0.94],
+        ...(staggerChildren && {
+          staggerChildren: staggerDelay,
+        }),
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+};
 
 // Child component for staggered animations
 interface MotionItemProps {

@@ -1,4 +1,5 @@
-import { FileText } from "lucide-react";
+import { FileText, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Layout from "@/components/layout/Layout";
 import { MotionSection, MotionCard } from "@/components/motion";
 import { motion } from "framer-motion";
@@ -189,22 +190,56 @@ const Bylaws = () => {
           <div className="max-w-4xl mx-auto">
             {/* Table of Contents & Download */}
             <MotionSection variant="scaleIn">
-              {/* Table of Contents */}
-              <div className="bg-card border border-border rounded-lg p-6 mb-12">
-                <h2 className="font-heading text-lg font-semibold text-foreground mb-4">
-                  Table of Contents
-                </h2>
-                <nav className="grid sm:grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-1">
-                  {bylawsContent.map((article, index) => (
-                    <button
-                      key={article.id}
-                      onClick={() => scrollToSection(article.id)}
-                      className="text-left text-sm text-muted-foreground hover:text-primary transition-colors py-1.5 hover:pl-2 duration-200"
+              <div className="grid md:grid-cols-3 gap-6 mb-12">
+                {/* Table of Contents */}
+                <div className="md:col-span-2 bg-card border border-border rounded-lg p-6">
+                  <h2 className="font-heading text-lg font-semibold text-foreground mb-4">
+                    Table of Contents
+                  </h2>
+                  <nav className="grid sm:grid-cols-2 gap-x-4 gap-y-1">
+                    {bylawsContent.map((article, index) => (
+                      <button
+                        key={article.id}
+                        onClick={() => scrollToSection(article.id)}
+                        className="text-left text-sm text-muted-foreground hover:text-primary transition-colors py-1.5 hover:pl-2 duration-200"
+                      >
+                        {index + 1}. {article.title.replace("Article ", "").replace(" – ", ": ")}
+                      </button>
+                    ))}
+                  </nav>
+                </div>
+
+                {/* Download Card */}
+                <MotionCard className="card-heritage p-6 flex flex-col">
+                  <div className="flex items-center gap-3 mb-4">
+                    <motion.div
+                      className="p-2.5 rounded-full bg-primary/10"
+                      whileHover={prefersReducedMotion ? {} : { scale: 1.1, rotate: 5 }}
                     >
-                      {index + 1}. {article.title.replace("Article ", "").replace(" – ", ": ")}
-                    </button>
-                  ))}
-                </nav>
+                      <FileText className="h-6 w-6 text-primary" />
+                    </motion.div>
+                    <div>
+                      <h3 className="font-heading text-base font-semibold text-foreground">
+                        Download
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        Get a copy
+                      </p>
+                    </div>
+                  </div>
+                  <motion.div
+                    className="mt-auto"
+                    whileHover={prefersReducedMotion ? {} : { y: -2 }}
+                    whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
+                  >
+                    <Button asChild variant="outline" size="sm" className="w-full">
+                      <a href="/documents/bylaws.docx" download>
+                        <Download className="mr-2 h-4 w-4" />
+                        DOCX
+                      </a>
+                    </Button>
+                  </motion.div>
+                </MotionCard>
               </div>
             </MotionSection>
 
