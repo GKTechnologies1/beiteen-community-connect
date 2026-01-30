@@ -10,9 +10,11 @@ import { MotionSection, MotionCard } from "@/components/motion";
 import { motion } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Contact = () => {
   const { toast } = useToast();
+  const { t, isRTL } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({
@@ -68,8 +70,8 @@ const Contact = () => {
 
       setIsSubmitted(true);
       toast({
-        title: "Message Sent!",
-        description: "Thank you for your inquiry. A member of our team will respond within 2 business days.",
+        title: t("contact.thankYou"),
+        description: t("contact.submitted"),
       });
       setFormData({ name: "", email: "", message: "" });
     } catch (error) {
@@ -99,12 +101,12 @@ const Contact = () => {
       {/* Hero Section */}
       <section className="bg-gradient-to-b from-olive-light to-background py-16 md:py-24">
         <div className="section-container">
-          <MotionSection className="max-w-3xl mx-auto text-center">
+          <MotionSection className={`max-w-3xl mx-auto text-center ${isRTL ? 'text-right' : ''}`}>
             <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground mb-6">
-              Contact Us
+              {t("contact.title")}
             </h1>
             <p className="text-lg text-muted-foreground">
-              We'd love to hear from you. Reach out with questions, ideas, or just to connect.
+              {t("contact.subtitle")}
             </p>
           </MotionSection>
         </div>
@@ -114,23 +116,22 @@ const Contact = () => {
       <section className="py-16 md:py-24 bg-background">
         <div className="section-container">
           <div className="max-w-5xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-12">
+            <div className={`grid md:grid-cols-2 gap-12 ${isRTL ? 'md:flex-row-reverse' : ''}`}>
               {/* Contact Info */}
               <MotionSection variant="fadeUp" className="space-y-8">
-                <div>
+                <div className={isRTL ? 'text-right' : ''}>
                   <h2 className="font-heading text-2xl font-semibold text-foreground mb-4">
-                    Get In Touch
+                    {t("contact.getInTouch")}
                   </h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    Whether you have questions about our organization, want to get involved, 
-                    or simply want to learn more about the Beiteen community, we're here to help.
+                    {t("contact.getInTouch.desc")}
                   </p>
                 </div>
 
                 <div className="space-y-4">
                   <motion.div
-                    className="flex items-start gap-4"
-                    whileHover={prefersReducedMotion ? {} : { x: 4 }}
+                    className={`flex items-start gap-4 ${isRTL ? 'flex-row-reverse text-right' : ''}`}
+                    whileHover={prefersReducedMotion ? {} : { x: isRTL ? -4 : 4 }}
                     transition={{ duration: 0.2 }}
                   >
                     <motion.div
@@ -140,7 +141,7 @@ const Contact = () => {
                       <Mail className="h-5 w-5 text-primary" />
                     </motion.div>
                     <div>
-                      <h3 className="font-medium text-foreground">Email</h3>
+                      <h3 className="font-medium text-foreground">{t("contact.email")}</h3>
                       <a
                         href="mailto:beiteenassociation.STL@gmail.com"
                         className="text-primary hover:underline"
@@ -151,8 +152,8 @@ const Contact = () => {
                   </motion.div>
 
                   <motion.div
-                    className="flex items-start gap-4"
-                    whileHover={prefersReducedMotion ? {} : { x: 4 }}
+                    className={`flex items-start gap-4 ${isRTL ? 'flex-row-reverse text-right' : ''}`}
+                    whileHover={prefersReducedMotion ? {} : { x: isRTL ? -4 : 4 }}
                     transition={{ duration: 0.2 }}
                   >
                     <motion.div
@@ -162,19 +163,18 @@ const Contact = () => {
                       <MapPin className="h-5 w-5 text-primary" />
                     </motion.div>
                     <div>
-                      <h3 className="font-medium text-foreground">Location</h3>
+                      <h3 className="font-medium text-foreground">{t("contact.location")}</h3>
                       <p className="text-muted-foreground">St. Louis, Missouri</p>
                     </div>
                   </motion.div>
                 </div>
 
-                <MotionCard className="p-6 bg-muted rounded-lg">
+                <MotionCard className={`p-6 bg-muted rounded-lg ${isRTL ? 'text-right' : ''}`}>
                   <h3 className="font-heading text-lg font-semibold text-foreground mb-2">
-                    Response Time
+                    {t("contact.responseTime.title")}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    We aim to respond to all inquiries within 2 business days. 
-                    For urgent matters, please indicate so in your message.
+                    {t("contact.responseTime.desc")}
                   </p>
                 </MotionCard>
               </MotionSection>
@@ -184,44 +184,44 @@ const Contact = () => {
                 <MotionCard className="card-heritage p-8">
                   {isSubmitted ? (
                     <motion.div
-                      className="text-center py-8"
+                      className={`text-center py-8 ${isRTL ? 'text-right' : ''}`}
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.3 }}
                     >
                       <motion.div
-                        className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4"
+                        className={`inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4 ${isRTL ? 'float-right ml-4' : ''}`}
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
                       >
                         <CheckCircle className="h-8 w-8" />
                       </motion.div>
-                      <h3 className="font-heading text-xl font-semibold text-foreground mb-2">
-                        Thank You!
+                      <h3 className="font-heading text-xl font-semibold text-foreground mb-2 clear-both">
+                        {t("contact.thankYou")}
                       </h3>
                       <p className="text-muted-foreground mb-6">
-                        Your message has been sent successfully. A member of our team will 
-                        respond within 2 business days.
+                        {t("contact.submitted")}
                       </p>
                       <Button
                         variant="outline"
                         onClick={() => setIsSubmitted(false)}
                       >
-                        Send Another Message
+                        {t("contact.sendAnother")}
                       </Button>
                     </motion.div>
                   ) : (
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit} className={`space-y-6 ${isRTL ? 'text-right' : ''}`}>
                       <div className="space-y-2">
-                        <Label htmlFor="name">Name</Label>
+                        <Label htmlFor="name">{t("contact.form.name")}</Label>
                         <Input
                           id="name"
                           name="name"
                           value={formData.name}
                           onChange={handleChange}
-                          placeholder="Your full name"
+                          placeholder={t("contact.form.namePlaceholder")}
                           className={errors.name ? "border-destructive" : ""}
+                          dir={isRTL ? "rtl" : "ltr"}
                         />
                         {errors.name && (
                           <p className="text-sm text-destructive">{errors.name}</p>
@@ -229,15 +229,16 @@ const Contact = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
+                        <Label htmlFor="email">{t("contact.form.email")}</Label>
                         <Input
                           id="email"
                           name="email"
                           type="email"
                           value={formData.email}
                           onChange={handleChange}
-                          placeholder="your@email.com"
+                          placeholder={t("contact.form.emailPlaceholder")}
                           className={errors.email ? "border-destructive" : ""}
+                          dir="ltr"
                         />
                         {errors.email && (
                           <p className="text-sm text-destructive">{errors.email}</p>
@@ -245,20 +246,21 @@ const Contact = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="message">Message</Label>
+                        <Label htmlFor="message">{t("contact.form.message")}</Label>
                         <Textarea
                           id="message"
                           name="message"
                           value={formData.message}
                           onChange={handleChange}
-                          placeholder="How can we help you?"
+                          placeholder={t("contact.form.messagePlaceholder")}
                           rows={5}
                           className={errors.message ? "border-destructive" : ""}
+                          dir={isRTL ? "rtl" : "ltr"}
                         />
                         {errors.message && (
                           <p className="text-sm text-destructive">{errors.message}</p>
                         )}
-                        <p className="text-xs text-muted-foreground text-right">
+                        <p className={`text-xs text-muted-foreground ${isRTL ? 'text-left' : 'text-right'}`}>
                           {formData.message.length}/1000
                         </p>
                       </div>
@@ -269,15 +271,15 @@ const Contact = () => {
                       >
                         <Button
                           type="submit"
-                          className="w-full btn-primary"
+                          className={`w-full btn-primary ${isRTL ? 'flex-row-reverse' : ''}`}
                           disabled={isSubmitting}
                         >
                           {isSubmitting ? (
-                            "Sending..."
+                            t("contact.form.sending")
                           ) : (
                             <>
-                              <Send className="mr-2 h-4 w-4" />
-                              Send Message
+                              <Send className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                              {t("contact.form.submit")}
                             </>
                           )}
                         </Button>

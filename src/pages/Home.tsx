@@ -9,40 +9,111 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { LatestUpdates } from "@/components/LatestUpdates";
 import { HowYouCanHelp } from "@/components/HowYouCanHelp";
 import ScrollIndicator from "@/components/ScrollIndicator";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Home = () => {
   const prefersReducedMotion = useReducedMotion();
+  const { t, isRTL } = useLanguage();
+
+  const coreValues = [
+    {
+      icon: Heart,
+      titleKey: "home.values.charitable.title",
+      descKey: "home.values.charitable.desc",
+    },
+    {
+      icon: BookOpen,
+      titleKey: "home.values.educational.title",
+      descKey: "home.values.educational.desc",
+    },
+    {
+      icon: Users,
+      titleKey: "home.values.cultural.title",
+      descKey: "home.values.cultural.desc",
+    },
+    {
+      icon: HomeIcon,
+      titleKey: "home.values.social.title",
+      descKey: "home.values.social.desc",
+    },
+  ];
+
+  const whoWeServe = [
+    {
+      icon: Users,
+      titleKey: "home.serve.families.title",
+      descKey: "home.serve.families.desc",
+    },
+    {
+      icon: BookOpen,
+      titleKey: "home.serve.youth.title",
+      descKey: "home.serve.youth.desc",
+    },
+    {
+      icon: Heart,
+      titleKey: "home.serve.elders.title",
+      descKey: "home.serve.elders.desc",
+    },
+    {
+      icon: Globe,
+      titleKey: "home.serve.community.title",
+      descKey: "home.serve.community.desc",
+    },
+  ];
+
+  const whatWeDo = [
+    {
+      icon: Calendar,
+      titleKey: "home.whatWeDo.gatherings.title",
+      descKey: "home.whatWeDo.gatherings.desc",
+    },
+    {
+      icon: BookOpen,
+      titleKey: "home.whatWeDo.education.title",
+      descKey: "home.whatWeDo.education.desc",
+    },
+    {
+      icon: Heart,
+      titleKey: "home.whatWeDo.humanitarian.title",
+      descKey: "home.whatWeDo.humanitarian.desc",
+    },
+    {
+      icon: Globe,
+      titleKey: "home.whatWeDo.preservation.title",
+      descKey: "home.whatWeDo.preservation.desc",
+    },
+  ];
 
   return (
     <Layout>
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-olive-light to-background">
         <ParallaxHero className="section-container py-16 md:py-24">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className={`grid md:grid-cols-2 gap-12 items-center ${isRTL ? 'md:flex-row-reverse' : ''}`}>
             <MotionSection variant="fadeUp" staggerChildren staggerDelay={0.1}>
               <motion.div
                 variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium"
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium ${isRTL ? 'flex-row-reverse' : ''}`}
               >
                 <Heart className="h-4 w-4" />
-                501(c)(3) Nonprofit Organization
+                {t("home.badge")}
               </motion.div>
               <motion.h1
                 variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
-                className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mt-6"
+                className={`font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mt-6 ${isRTL ? 'text-right' : ''}`}
               >
-                Building Community,{" "}
-                <span className="text-primary">Preserving Heritage</span>
+                {t("home.hero.title1")}{" "}
+                <span className="text-primary">{t("home.hero.title2")}</span>
               </motion.h1>
               <motion.p
                 variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
-                className="text-lg text-muted-foreground leading-relaxed max-w-xl mt-6"
+                className={`text-lg text-muted-foreground leading-relaxed max-w-xl mt-6 ${isRTL ? 'text-right' : ''}`}
               >
-                The Beiteen Association U.S.A. connects families and preserves our rich cultural heritage through charitable programs, educational initiatives, and community events.
+                {t("home.hero.description")}
               </motion.p>
               <motion.div
                 variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}
-                className="flex flex-wrap gap-4 pt-2 mt-6"
+                className={`flex flex-wrap gap-4 pt-2 mt-6 ${isRTL ? 'flex-row-reverse' : ''}`}
               >
                 <motion.div
                   whileHover={prefersReducedMotion ? {} : { y: -2 }}
@@ -50,8 +121,8 @@ const Home = () => {
                 >
                   <Button asChild size="lg" className="btn-primary">
                     <Link to="/mission">
-                      Our Mission
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                      {t("home.hero.missionBtn")}
+                      <ArrowRight className={`h-4 w-4 ${isRTL ? 'mr-2 rotate-180' : 'ml-2'}`} />
                     </Link>
                   </Button>
                 </motion.div>
@@ -60,7 +131,7 @@ const Home = () => {
                   whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
                 >
                   <Button asChild variant="outline" size="lg" className="btn-secondary">
-                    <Link to="/contact">Get In Touch</Link>
+                    <Link to="/contact">{t("home.hero.contactBtn")}</Link>
                   </Button>
                 </motion.div>
               </motion.div>
@@ -84,7 +155,7 @@ const Home = () => {
         
         {/* Scroll Indicator - Desktop only */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
-          <ScrollIndicator targetId="core-values" />
+          <ScrollIndicator targetId="core-values" label={t("common.scroll")} />
         </div>
         
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent pointer-events-none" />
@@ -93,46 +164,25 @@ const Home = () => {
       {/* Values Section */}
       <section id="core-values" className="py-16 md:py-24 bg-background scroll-mt-20">
         <div className="section-container">
-          <MotionSection className="text-center max-w-2xl mx-auto mb-12">
+          <MotionSection className={`text-center max-w-2xl mx-auto mb-12 ${isRTL ? 'text-right' : ''}`}>
             <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Our Core Values
+              {t("home.values.title")}
             </h2>
             <p className="text-muted-foreground">
-              Guided by our commitment to community, culture, and connection.
+              {t("home.values.subtitle")}
             </p>
           </MotionSection>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                icon: Heart,
-                title: "Charitable",
-                description: "Supporting those in need within our community through various assistance programs.",
-              },
-              {
-                icon: BookOpen,
-                title: "Educational",
-                description: "Fostering learning and growth through scholarships and educational initiatives.",
-              },
-              {
-                icon: Users,
-                title: "Cultural",
-                description: "Preserving and celebrating our rich Palestinian heritage and traditions.",
-              },
-              {
-                icon: HomeIcon,
-                title: "Social",
-                description: "Building strong connections through gatherings, events, and family support.",
-              },
-            ].map((value, index) => (
-              <MotionSection key={value.title} delay={index * 0.1}>
-                <MotionCard className="card-heritage p-6 text-center h-full">
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary mb-4">
+            {coreValues.map((value, index) => (
+              <MotionSection key={value.titleKey} delay={index * 0.1}>
+                <MotionCard className={`card-heritage p-6 text-center h-full ${isRTL ? 'text-right' : ''}`}>
+                  <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary mb-4 ${isRTL ? 'float-right ml-4' : ''}`}>
                     <value.icon className="h-6 w-6" />
                   </div>
-                  <h3 className="font-heading text-xl font-semibold text-foreground mb-2">
-                    {value.title}
+                  <h3 className="font-heading text-xl font-semibold text-foreground mb-2 clear-both">
+                    {t(value.titleKey)}
                   </h3>
-                  <p className="text-sm text-muted-foreground">{value.description}</p>
+                  <p className="text-sm text-muted-foreground">{t(value.descKey)}</p>
                 </MotionCard>
               </MotionSection>
             ))}
@@ -143,46 +193,25 @@ const Home = () => {
       {/* Who We Serve Section */}
       <section className="py-16 md:py-24 bg-muted">
         <div className="section-container">
-          <MotionSection className="text-center max-w-2xl mx-auto mb-12">
+          <MotionSection className={`text-center max-w-2xl mx-auto mb-12 ${isRTL ? 'text-right' : ''}`}>
             <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Who We Serve
+              {t("home.serve.title")}
             </h2>
             <p className="text-muted-foreground">
-              Our community extends across generations and geography, united by shared heritage.
+              {t("home.serve.subtitle")}
             </p>
           </MotionSection>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                icon: Users,
-                title: "Families of Beiteen",
-                description: "Descendants and relatives of the village of Beiteen, connecting our extended family.",
-              },
-              {
-                icon: BookOpen,
-                title: "Youth & Future Generations",
-                description: "Young people learning about their heritage and building connections for the future.",
-              },
-              {
-                icon: Heart,
-                title: "Elders & Heritage Keepers",
-                description: "Those who preserve our stories, traditions, and cultural knowledge.",
-              },
-              {
-                icon: Globe,
-                title: "Community Near & Far",
-                description: "Members locally in St. Louis and connected globally through our shared roots.",
-              },
-            ].map((item, index) => (
-              <MotionSection key={item.title} delay={index * 0.1}>
-                <MotionCard className="card-heritage p-6 text-center h-full">
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-accent/10 text-accent mb-4">
+            {whoWeServe.map((item, index) => (
+              <MotionSection key={item.titleKey} delay={index * 0.1}>
+                <MotionCard className={`card-heritage p-6 text-center h-full ${isRTL ? 'text-right' : ''}`}>
+                  <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-accent/10 text-accent mb-4 ${isRTL ? 'float-right ml-4' : ''}`}>
                     <item.icon className="h-6 w-6" />
                   </div>
-                  <h3 className="font-heading text-lg font-semibold text-foreground mb-2">
-                    {item.title}
+                  <h3 className="font-heading text-lg font-semibold text-foreground mb-2 clear-both">
+                    {t(item.titleKey)}
                   </h3>
-                  <p className="text-sm text-muted-foreground">{item.description}</p>
+                  <p className="text-sm text-muted-foreground">{t(item.descKey)}</p>
                 </MotionCard>
               </MotionSection>
             ))}
@@ -193,41 +222,20 @@ const Home = () => {
       {/* What We Do Section */}
       <section className="py-16 md:py-24 bg-background">
         <div className="section-container">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className={`grid md:grid-cols-2 gap-12 items-center ${isRTL ? 'md:flex-row-reverse' : ''}`}>
             <MotionSection variant="fadeUp">
-              <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground mb-6">
-                What We Do
+              <h2 className={`font-heading text-3xl md:text-4xl font-bold text-foreground mb-6 ${isRTL ? 'text-right' : ''}`}>
+                {t("home.whatWeDo.title")}
               </h2>
-              <p className="text-muted-foreground leading-relaxed mb-8">
-                Through our programs and initiatives, we strengthen bonds within our community while giving back to those in need.
+              <p className={`text-muted-foreground leading-relaxed mb-8 ${isRTL ? 'text-right' : ''}`}>
+                {t("home.whatWeDo.subtitle")}
               </p>
               <div className="grid gap-4">
-                {[
-                  {
-                    icon: Calendar,
-                    title: "Community Gatherings & Cultural Events",
-                    description: "Regular events including Ramadan iftars, Eid celebrations, and family gatherings.",
-                  },
-                  {
-                    icon: BookOpen,
-                    title: "Educational & Youth Programs",
-                    description: "Supporting scholarships and educational opportunities for young community members.",
-                  },
-                  {
-                    icon: Heart,
-                    title: "Humanitarian Initiatives",
-                    description: "Charitable programs supporting families in need locally and abroad.",
-                  },
-                  {
-                    icon: Globe,
-                    title: "Cultural Preservation",
-                    description: "Documenting and celebrating our Palestinian heritage and traditions.",
-                  },
-                ].map((item, index) => (
+                {whatWeDo.map((item, index) => (
                   <motion.div
-                    key={item.title}
-                    className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg"
-                    initial={{ opacity: 0, x: -20 }}
+                    key={item.titleKey}
+                    className={`flex items-start gap-4 p-4 bg-muted/50 rounded-lg ${isRTL ? 'flex-row-reverse text-right' : ''}`}
+                    initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1, duration: 0.4 }}
@@ -236,8 +244,8 @@ const Home = () => {
                       <item.icon className="h-5 w-5" />
                     </div>
                     <div>
-                      <h3 className="font-heading font-semibold text-foreground mb-1">{item.title}</h3>
-                      <p className="text-sm text-muted-foreground">{item.description}</p>
+                      <h3 className="font-heading font-semibold text-foreground mb-1">{t(item.titleKey)}</h3>
+                      <p className="text-sm text-muted-foreground">{t(item.descKey)}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -245,7 +253,7 @@ const Home = () => {
             </MotionSection>
             <MotionSection variant="scaleIn" delay={0.2}>
               <motion.div
-                className="bg-gradient-to-br from-primary/10 to-accent/10 rounded-2xl p-8 md:p-12 text-center"
+                className={`bg-gradient-to-br from-primary/10 to-accent/10 rounded-2xl p-8 md:p-12 text-center ${isRTL ? 'text-right' : ''}`}
                 whileHover={prefersReducedMotion ? {} : { scale: 1.02 }}
                 transition={{ duration: 0.3 }}
               >
@@ -256,13 +264,13 @@ const Home = () => {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: 0.3 }}
                 >
-                  5 Year
+                  {t("home.whatWeDo.goal")}
                 </motion.div>
                 <div className="font-heading text-2xl text-foreground mb-2">
-                  Community Property Goal
+                  {t("home.whatWeDo.goalTitle")}
                 </div>
                 <p className="text-muted-foreground">
-                  A permanent home for our community in St. Louis
+                  {t("home.whatWeDo.goalDesc")}
                 </p>
               </motion.div>
             </MotionSection>
@@ -273,27 +281,24 @@ const Home = () => {
       {/* Commitment to Transparency Section */}
       <section className="py-16 md:py-24 bg-muted">
         <div className="section-container">
-          <div className="max-w-3xl mx-auto text-center">
+          <div className={`max-w-3xl mx-auto text-center ${isRTL ? 'text-right' : ''}`}>
             <MotionSection>
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-6">
+              <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-6 ${isRTL ? 'float-right ml-6' : ''}`}>
                 <Shield className="h-8 w-8" />
               </div>
-              <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground mb-6">
-                Our Commitment to Transparency
+              <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground mb-6 clear-both">
+                {t("home.transparency.title")}
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed mb-8">
-                The Beiteen Association U.S.A. operates with the highest standards of ethical governance. 
-                Our bylaws are publicly available, and we are committed to responsible stewardship of all 
-                contributions. We believe in community accountability and maintain open communication 
-                with our members about how resources are used to serve our mission.
+                {t("home.transparency.desc")}
               </p>
-              <div className="flex flex-wrap justify-center gap-4">
+              <div className={`flex flex-wrap justify-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <motion.div
                   whileHover={prefersReducedMotion ? {} : { y: -2 }}
                   whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
                 >
                   <Button asChild variant="outline" size="lg">
-                    <Link to="/bylaws">View Our Bylaws</Link>
+                    <Link to="/bylaws">{t("home.transparency.bylawsBtn")}</Link>
                   </Button>
                 </motion.div>
                 <motion.div
@@ -301,7 +306,7 @@ const Home = () => {
                   whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
                 >
                   <Button asChild variant="outline" size="lg">
-                    <Link to="/board">Meet Our Board</Link>
+                    <Link to="/board">{t("home.transparency.boardBtn")}</Link>
                   </Button>
                 </motion.div>
               </div>
@@ -326,29 +331,27 @@ const Home = () => {
       <section className="py-16 md:py-20 bg-background">
         <div className="section-container">
           <MotionCard className="card-heritage p-8 md:p-12">
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div>
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-accent/10 text-accent mb-4">
+            <div className={`grid md:grid-cols-2 gap-8 items-center ${isRTL ? 'md:flex-row-reverse' : ''}`}>
+              <div className={isRTL ? 'text-right' : ''}>
+                <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-accent/10 text-accent mb-4 ${isRTL ? 'float-right ml-4' : ''}`}>
                   <HandHeart className="h-6 w-6" />
                 </div>
-                <h2 className="font-heading text-2xl md:text-3xl font-bold text-foreground mb-4">
-                  Volunteer With Us
+                <h2 className="font-heading text-2xl md:text-3xl font-bold text-foreground mb-4 clear-both">
+                  {t("home.volunteer.title")}
                 </h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  Looking for ways to contribute beyond financial support? We welcome volunteers who can help 
-                  with event planning, youth mentoring, cultural programming, and more. Your time and talents 
-                  make a real difference in our community.
+                  {t("home.volunteer.desc")}
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-4 md:justify-end">
+              <div className={`flex flex-col sm:flex-row gap-4 ${isRTL ? 'md:justify-start' : 'md:justify-end'}`}>
                 <motion.div
                   whileHover={prefersReducedMotion ? {} : { y: -2 }}
                   whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
                 >
                   <Button asChild size="lg" className="btn-primary">
                     <Link to="/contact">
-                      Get Involved
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                      {t("home.volunteer.btn")}
+                      <ArrowRight className={`h-4 w-4 ${isRTL ? 'mr-2 rotate-180' : 'ml-2'}`} />
                     </Link>
                   </Button>
                 </motion.div>
@@ -360,32 +363,28 @@ const Home = () => {
 
       {/* Main CTA Section */}
       <section className="py-16 md:py-24 bg-primary text-primary-foreground">
-        <MotionSection className="section-container text-center">
+        <MotionSection className={`section-container text-center ${isRTL ? 'text-right' : ''}`}>
           <h2 className="font-heading text-3xl md:text-4xl font-bold mb-4">
-            Join Our Community
+            {t("home.join.title")}
           </h2>
           <p className="text-primary-foreground/80 max-w-2xl mx-auto mb-8">
-            Whether you're looking to reconnect with your heritage, support our community initiatives, or simply learn more about Beiteen, we welcome you with open arms.
+            {t("home.join.desc")}
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className={`flex flex-wrap justify-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <motion.div
               whileHover={prefersReducedMotion ? {} : { y: -2, scale: 1.02 }}
               whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
             >
               <Button asChild size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-medium">
-                <Link to="/membership">Become a Member</Link>
+                <Link to="/membership">{t("home.join.memberBtn")}</Link>
               </Button>
             </motion.div>
             <motion.div
               whileHover={prefersReducedMotion ? {} : { y: -2, scale: 1.02 }}
               whileTap={prefersReducedMotion ? {} : { scale: 0.98 }}
             >
-              <Button
-                asChild
-                size="lg"
-                className="bg-transparent border-2 border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10 font-medium"
-              >
-                <Link to="/donations">Support Our Mission</Link>
+              <Button asChild size="lg" variant="outline" className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10">
+                <Link to="/donations">{t("home.join.donateBtn")}</Link>
               </Button>
             </motion.div>
           </div>
