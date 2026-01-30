@@ -1,4 +1,5 @@
-// Main App component with LanguageProvider for i18n
+// Main App component with LanguageProvider for i18n - Full site translation support
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
