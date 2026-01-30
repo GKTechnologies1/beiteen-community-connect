@@ -40,12 +40,12 @@ const Footer = () => {
             </p>
           </div>
 
-          {/* Quick Links */}
+          {/* Quick Links - 2x4 Grid */}
           <div>
             <h3 className={`font-heading text-lg font-semibold mb-4 ${isRTL ? 'text-right' : ''}`}>
               {t("footer.quickLinks")}
             </h3>
-            <ul className="space-y-2">
+            <ul className="grid grid-cols-2 gap-x-6 gap-y-2">
               {quickLinks.map((link) => (
                 <li key={link.href} className={isRTL ? 'text-right' : ''}>
                   <Link
