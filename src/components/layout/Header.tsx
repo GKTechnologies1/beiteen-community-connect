@@ -2,28 +2,31 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import LanguageToggle from "@/components/LanguageToggle";
+import { useLanguage } from "@/contexts/LanguageContext";
 import logo from "@/assets/beiteen-logo.jpeg";
-
-const navigation = [
-  { name: "Home", href: "/" },
-  { name: "Mission", href: "/mission" },
-  { name: "Board", href: "/board" },
-  { name: "Bylaws", href: "/bylaws" },
-  { name: "Gallery", href: "/gallery" },
-  { name: "Membership", href: "/membership" },
-  { name: "Donate", href: "/donations" },
-  { name: "Contact", href: "/contact" },
-];
 
 const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { t, isRTL } = useLanguage();
+
+  const navigation = [
+    { name: t("nav.home"), href: "/" },
+    { name: t("nav.mission"), href: "/mission" },
+    { name: t("nav.board"), href: "/board" },
+    { name: t("nav.bylaws"), href: "/bylaws" },
+    { name: t("nav.gallery"), href: "/gallery" },
+    { name: t("nav.membership"), href: "/membership" },
+    { name: t("nav.donate"), href: "/donations" },
+    { name: t("nav.contact"), href: "/contact" },
+  ];
 
   return (
     <header className="sticky top-0 z-50 bg-background border-b border-border">
-      <nav className="section-container flex items-center justify-between py-4">
+      <nav className={`section-container flex items-center justify-between py-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-3 group">
+        <Link to="/" className={`flex items-center gap-3 group ${isRTL ? 'flex-row-reverse' : ''}`}>
           <img
             src={logo}
             alt="Beiteen Association U.S.A. Logo"
@@ -37,11 +40,11 @@ const Header = () => {
           </div>
         </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-1">
+        {/* Desktop Navigation + Language Toggle */}
+        <div className={`hidden md:flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
           {navigation.map((item) => (
             <Link
-              key={item.name}
+              key={item.href}
               to={item.href}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 location.pathname === item.href
@@ -52,18 +55,23 @@ const Header = () => {
               {item.name}
             </Link>
           ))}
+          <div className={`${isRTL ? 'mr-2' : 'ml-2'} border-l border-border pl-2`}>
+            <LanguageToggle />
+          </div>
         </div>
 
-        {/* Mobile menu button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </Button>
+        {/* Mobile menu button + Language Toggle */}
+        <div className={`md:hidden flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <LanguageToggle />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </Button>
+        </div>
       </nav>
 
       {/* Mobile Navigation */}
@@ -72,10 +80,10 @@ const Header = () => {
           <div className="section-container py-4 space-y-1">
             {navigation.map((item) => (
               <Link
-                key={item.name}
+                key={item.href}
                 to={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`block px-4 py-3 text-base font-medium rounded-md transition-colors ${
+                className={`block px-4 py-3 text-base font-medium rounded-md transition-colors ${isRTL ? 'text-right' : 'text-left'} ${
                   location.pathname === item.href
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
