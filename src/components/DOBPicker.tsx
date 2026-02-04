@@ -44,7 +44,7 @@ export const DOBPicker = ({
   const selectedDay = value ? value.getDate().toString() : "";
   const selectedYear = value ? value.getFullYear().toString() : "";
 
-  // Generate years array (descending order for easy scrolling)
+  // Generate years array (descending order for easy scrolling to older years)
   const years = useMemo(() => {
     const yearsArr: string[] = [];
     for (let y = maxYear; y >= minYear; y--) {
@@ -109,17 +109,26 @@ export const DOBPicker = ({
   };
 
   const errorClass = error ? "border-destructive" : "";
+  const baseSelectClass = "focus:ring-0 focus:ring-offset-0 touch-manipulation";
 
   return (
     <div className={`grid grid-cols-3 gap-2 ${isRTL ? "direction-rtl" : ""}`}>
       {/* Month */}
       <Select value={selectedMonth} onValueChange={handleMonthChange}>
-        <SelectTrigger className={errorClass}>
+        <SelectTrigger className={`${errorClass} ${baseSelectClass}`}>
           <SelectValue placeholder={language === "ar" ? "الشهر" : "Month"} />
         </SelectTrigger>
-        <SelectContent className="bg-background max-h-60">
+        <SelectContent 
+          className="bg-background z-50 max-h-[280px] overflow-y-auto"
+          position="popper"
+          sideOffset={4}
+        >
           {months.map((month) => (
-            <SelectItem key={month.value} value={month.value}>
+            <SelectItem 
+              key={month.value} 
+              value={month.value}
+              className="cursor-pointer py-2.5"
+            >
               {language === "ar" ? month.ar : month.en}
             </SelectItem>
           ))}
@@ -128,26 +137,42 @@ export const DOBPicker = ({
 
       {/* Day */}
       <Select value={selectedDay} onValueChange={handleDayChange}>
-        <SelectTrigger className={errorClass}>
+        <SelectTrigger className={`${errorClass} ${baseSelectClass}`}>
           <SelectValue placeholder={language === "ar" ? "اليوم" : "Day"} />
         </SelectTrigger>
-        <SelectContent className="bg-background max-h-60">
+        <SelectContent 
+          className="bg-background z-50 max-h-[280px] overflow-y-auto"
+          position="popper"
+          sideOffset={4}
+        >
           {days.map((day) => (
-            <SelectItem key={day} value={day}>
+            <SelectItem 
+              key={day} 
+              value={day}
+              className="cursor-pointer py-2.5"
+            >
               {day}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
 
-      {/* Year */}
+      {/* Year - Most important for DOB, easy to scroll to older years */}
       <Select value={selectedYear} onValueChange={handleYearChange}>
-        <SelectTrigger className={errorClass}>
+        <SelectTrigger className={`${errorClass} ${baseSelectClass}`}>
           <SelectValue placeholder={language === "ar" ? "السنة" : "Year"} />
         </SelectTrigger>
-        <SelectContent className="bg-background max-h-60">
+        <SelectContent 
+          className="bg-background z-50 max-h-[280px] overflow-y-auto"
+          position="popper"
+          sideOffset={4}
+        >
           {years.map((year) => (
-            <SelectItem key={year} value={year}>
+            <SelectItem 
+              key={year} 
+              value={year}
+              className="cursor-pointer py-2.5"
+            >
               {year}
             </SelectItem>
           ))}

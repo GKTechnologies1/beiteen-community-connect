@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Users, CheckCircle, Upload, X } from "lucide-react";
+import { Users, CheckCircle, Upload, X, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,6 +24,8 @@ import { isValidEmail, isValidUSPhone, isValidZelleContact, isValidZipCode } fro
 import { FAQ, membershipFAQs } from "@/components/FAQ";
 import { DOBPicker } from "@/components/DOBPicker";
 import { sendNotificationEmail } from "@/lib/email-notifications";
+import { MembershipFees } from "@/components/MembershipFees";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const ZELLE_EMAIL = "beiteenassociation.stl@gmail.com";
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -47,6 +49,7 @@ interface FormData {
 
 const Membership = () => {
   const { toast } = useToast();
+  const { language, isRTL } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
@@ -332,6 +335,17 @@ const Membership = () => {
           </MotionSection>
         </div>
       </section>
+
+      {/* Membership Fees Section - Above Form */}
+      {!isSubmitted && (
+        <section className="py-12 md:py-16 bg-muted/30">
+          <div className="section-container">
+            <div className="max-w-4xl mx-auto">
+              <MembershipFees />
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Membership Content */}
       <section className="py-16 md:py-24 bg-background">
@@ -653,16 +667,27 @@ const Membership = () => {
                         )}
                       </div>
 
-                      {/* College ID Upload */}
-                      <div className="space-y-2">
-                        <Label>
-                          College ID Upload (Optional - for household members ages 18-21)
-                        </Label>
-                        <p className="text-xs text-muted-foreground mb-2">
-                          If any household member age 18-21 is a college student, upload a valid college ID. 
-                          Max 5 files, 10MB each.
-                        </p>
-                        <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
+                      {/* College ID Upload - Improved Clarity */}
+                      <div className="space-y-3">
+                        <div className="p-4 rounded-lg bg-accent/30 border border-accent">
+                          <div className="flex items-start gap-3">
+                            <AlertCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                            <div>
+                              <Label className="text-base font-medium">
+                                {language === "ar" 
+                                  ? "تحميل هوية الكلية (لأفراد الأسرة من سن 18-21)" 
+                                  : "College ID Upload (For ages 18-21)"}
+                              </Label>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {language === "ar"
+                                  ? "إذا كان أي فرد من أفراد الأسرة بعمر 18-21 ومسجل في الجامعة، يرجى تحميل هوية طالب صالحة للحصول على سعر الطالب ($50 بدلاً من $100)."
+                                  : "If any household member is between 18-21 and enrolled in college, please upload a valid student ID to qualify for the student rate ($50 instead of $100)."}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="border-2 border-dashed border-border rounded-lg p-6 text-center bg-background">
                           <input
                             ref={fileInputRef}
                             type="file"
@@ -674,23 +699,33 @@ const Membership = () => {
                           />
                           <label
                             htmlFor="college-id-upload"
-                            className="cursor-pointer flex flex-col items-center gap-2"
+                            className="cursor-pointer flex flex-col items-center gap-3"
                           >
-                            <Upload className="h-8 w-8 text-muted-foreground" />
-                            <span className="text-sm text-muted-foreground">
-                              Click to upload college ID(s)
-                            </span>
+                            <div className="p-3 rounded-full bg-muted">
+                              <Upload className="h-6 w-6 text-muted-foreground" />
+                            </div>
+                            <div>
+                              <span className="text-sm font-medium text-foreground block">
+                                {language === "ar" ? "انقر لتحميل هوية الكلية" : "Click to upload college ID(s)"}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {language === "ar" 
+                                  ? "الحد الأقصى 5 ملفات، 10 ميجابايت لكل ملف"
+                                  : "Max 5 files, 10MB each • Images or PDF"}
+                              </span>
+                            </div>
                           </label>
                         </div>
+                        
                         {files.length > 0 && (
-                          <ul className="mt-2 space-y-2">
+                          <ul className="space-y-2">
                             {files.map((file, index) => (
-                              <li key={index} className="flex items-center justify-between bg-muted px-3 py-2 rounded-md text-sm">
-                                <span className="truncate">{file.name}</span>
+                              <li key={index} className="flex items-center justify-between bg-muted px-4 py-3 rounded-lg text-sm">
+                                <span className="truncate font-medium">{file.name}</span>
                                 <button
                                   type="button"
                                   onClick={() => removeFile(index)}
-                                  className="text-destructive hover:text-destructive/80 ml-2"
+                                  className="text-destructive hover:text-destructive/80 ml-2 p-1"
                                 >
                                   <X className="h-4 w-4" />
                                 </button>
