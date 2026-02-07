@@ -9,7 +9,7 @@ export interface HouseholdMember {
 }
 
 export const RELATIONSHIPS = [
-  { value: "spouse", en: "Spouse", ar: "زوج/زوجة" },
+  { value: "husband_wife", en: "Husband/Wife", ar: "زوج/زوجة" },
   { value: "son", en: "Son", ar: "ابن" },
   { value: "daughter", en: "Daughter", ar: "ابنة" },
   { value: "father", en: "Father", ar: "أب" },
