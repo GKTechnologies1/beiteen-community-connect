@@ -1,8 +1,29 @@
+/**
+ * send-notification-email — Beiteen Association Edge Function
+ *
+ * RESEND_API_KEY: Stored as a Lovable Cloud secret. Used to authenticate
+ *   with the Resend API (https://resend.com).
+ *
+ * FROM address: "Beiteen Association <onboarding@resend.dev>"
+ *   — For production, verify your domain at https://resend.com/domains
+ *     then change to e.g. "Beiteen Association <noreply@beiteen.org>"
+ *
+ * TO:  beiteenassociation.STL@gmail.com
+ * CC:  gktechnologies.stl@gmail.com (testing/admin copy)
+ *
+ * Domain verification (Resend):
+ *   1. Go to https://resend.com/domains
+ *   2. Add your domain (e.g. beiteen.org)
+ *   3. Add the DNS records Resend provides (MX, SPF, DKIM)
+ *   4. Once verified, update FROM address above
+ */
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-// Primary recipient for all form submissions
-const NOTIFICATION_EMAIL = "beiteenassociation.STL@gmail.com";
+
+// Recipients for all form submissions
+const NOTIFICATION_TO = "beiteenassociation.STL@gmail.com";
+const NOTIFICATION_CC = "gktechnologies.stl@gmail.com";
 
 // Logo URL - hosted publicly
 const LOGO_URL = "https://beiteen-community-connect.lovable.app/beiteen-logo.png";
@@ -396,9 +417,12 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   if (!RESEND_API_KEY) {
-    console.error("RESEND_API_KEY is not configured");
+    console.error("⚠️ ADMIN WARNING: RESEND_API_KEY is not configured. All email notifications will fail. Add the key in Lovable Cloud → Secrets.");
     return new Response(
-      JSON.stringify({ error: "Email service not configured" }),
+      JSON.stringify({ 
+        success: false, 
+        error: "Email service is not configured. Your submission was saved but the notification email could not be sent. Please contact the administrator." 
+      }),
       { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   }
@@ -425,19 +449,26 @@ const handler = async (req: Request): Promise<Response> => {
         throw new Error(`Unknown form type: ${formType}`);
     }
 
+    // Validate submitter email if provided
+    if (emailContent.replyTo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailContent.replyTo)) {
+      console.warn("Invalid reply-to email, stripping:", emailContent.replyTo);
+      emailContent.replyTo = undefined;
+    }
+
     const emailPayload: Record<string, unknown> = {
       from: "Beiteen Association <onboarding@resend.dev>",
-      to: [NOTIFICATION_EMAIL],
+      to: [NOTIFICATION_TO],
+      cc: [NOTIFICATION_CC],
       subject: emailContent.subject,
       html: emailContent.html,
     };
 
-    // Add Reply-To if submitter provided email
+    // Add Reply-To if submitter provided a valid email
     if (emailContent.replyTo) {
       emailPayload.reply_to = emailContent.replyTo;
     }
 
-    console.log("Sending email to:", NOTIFICATION_EMAIL);
+    console.log(`Sending ${formType} email — TO: ${NOTIFICATION_TO}, CC: ${NOTIFICATION_CC}`);
     console.log("Reply-To:", emailContent.replyTo || "None");
 
     const emailResponse = await fetch("https://api.resend.com/emails", {
@@ -452,11 +483,19 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResult = await emailResponse.json();
     
     if (!emailResponse.ok) {
-      console.error("Resend API error:", emailResult);
-      throw new Error(emailResult.message || `Email delivery failed with status ${emailResponse.status}`);
+      const isVerificationIssue = emailResult.message?.includes("verify") || emailResult.message?.includes("domain") || emailResult.statusCode === 403;
+      if (isVerificationIssue) {
+        console.error("⚠️ ADMIN WARNING: Domain verification required. Emails cannot be delivered to external addresses. Verify domain at https://resend.com/domains");
+      }
+      console.error("Resend API error:", JSON.stringify(emailResult));
+      throw new Error(
+        isVerificationIssue
+          ? "Email delivery blocked: domain verification required. Your submission was saved but the email could not be sent."
+          : (emailResult.message || `Email delivery failed with status ${emailResponse.status}`)
+      );
     }
 
-    console.log("Email sent successfully:", emailResult);
+    console.log("✅ Email sent successfully:", emailResult);
 
     return new Response(JSON.stringify({ success: true, emailId: emailResult.id }), {
       status: 200,
@@ -467,9 +506,13 @@ const handler = async (req: Request): Promise<Response> => {
     });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error("Error sending notification email:", errorMessage);
+    console.error("❌ Error sending notification email:", errorMessage);
     return new Response(
-      JSON.stringify({ success: false, error: errorMessage }),
+      JSON.stringify({ 
+        success: false, 
+        error: errorMessage,
+        note: "The form submission was saved to the database. Only the email notification failed."
+      }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
