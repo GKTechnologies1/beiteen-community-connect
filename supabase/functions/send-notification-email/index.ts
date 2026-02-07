@@ -578,7 +578,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Sending ${formType} email — TO: ${NOTIFICATION_TO}, CC: ${NOTIFICATION_CC}`);
     console.log("Reply-To:", emailContent.replyTo || "None");
 
-    const emailResponse = await fetch("https://api.resend.com/emails", {
+    let emailResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
@@ -587,19 +587,43 @@ const handler = async (req: Request): Promise<Response> => {
       body: JSON.stringify(emailPayload),
     });
 
-    const emailResult = await emailResponse.json();
+    let emailResult = await emailResponse.json();
     
     if (!emailResponse.ok) {
       const isVerificationIssue = emailResult.message?.includes("verify") || emailResult.message?.includes("domain") || emailResult.statusCode === 403;
+      
       if (isVerificationIssue) {
-        console.error("⚠️ ADMIN WARNING: Domain verification required. Emails cannot be delivered to external addresses. Verify domain at https://resend.com/domains");
+        console.warn("⚠️ Domain not verified. Falling back to send only to verified account email:", NOTIFICATION_CC);
+        
+        // Retry sending only to the verified account email
+        const fallbackPayload = {
+          ...emailPayload,
+          to: [NOTIFICATION_CC],
+          cc: undefined,
+          subject: `[FALLBACK] ${emailContent.subject}`,
+        };
+        
+        emailResponse = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${RESEND_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(fallbackPayload),
+        });
+        
+        emailResult = await emailResponse.json();
+        
+        if (!emailResponse.ok) {
+          console.error("Resend API fallback error:", JSON.stringify(emailResult));
+          throw new Error(emailResult.message || `Email delivery failed with status ${emailResponse.status}`);
+        }
+        
+        console.log("✅ Fallback email sent to verified address:", NOTIFICATION_CC);
+      } else {
+        console.error("Resend API error:", JSON.stringify(emailResult));
+        throw new Error(emailResult.message || `Email delivery failed with status ${emailResponse.status}`);
       }
-      console.error("Resend API error:", JSON.stringify(emailResult));
-      throw new Error(
-        isVerificationIssue
-          ? "Email delivery blocked: domain verification required. Your submission was saved but the email could not be sent."
-          : (emailResult.message || `Email delivery failed with status ${emailResponse.status}`)
-      );
     }
 
     console.log("✅ Email sent successfully:", emailResult);
