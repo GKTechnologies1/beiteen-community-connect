@@ -19,7 +19,7 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { supabase } from "@/integrations/supabase/client";
 import zelleQR from "@/assets/zelle-qr.png";
 import { US_STATES } from "@/lib/us-states";
-import { isValidEmail, isValidUSPhone, isValidZelleContact, isValidZipCode } from "@/lib/validation";
+import { isValidEmail, isValidUSPhone, isValidZelleContact, isValidZipCode, formatPhoneForStorage } from "@/lib/validation";
 import { FAQ, membershipFAQs } from "@/components/FAQ";
 import { DOBPicker } from "@/components/DOBPicker";
 import { sendNotificationEmail } from "@/lib/email-notifications";
@@ -34,6 +34,7 @@ import {
   serializeMembersForDB,
   serializeMembersForEmail,
 } from "@/components/membership/utils";
+import { PhoneInput } from "@/components/PhoneInput";
 
 const ZELLE_EMAIL = "beiteenassociation.stl@gmail.com";
 
@@ -259,7 +260,7 @@ const Membership = () => {
         head_first_name: formData.headFirstName.trim(),
         head_middle_name: formData.headMiddleName.trim(),
         head_dob: formData.headDob?.toISOString().split("T")[0],
-        phone: formData.phone.trim(),
+        phone: formatPhoneForStorage(formData.phone),
         email: formData.email.trim(),
         street_address: formData.streetAddress.trim(),
         city: formData.city.trim(),
@@ -313,6 +314,15 @@ const Membership = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const handleEmailBlur = () => {
+    if (formData.email.trim() && !isValidEmail(formData.email)) {
+      setErrors((prev) => ({
+        ...prev,
+        email: language === "ar" ? "يرجى إدخال بريد إلكتروني صالح" : "Please enter a valid email address.",
+      }));
     }
   };
 
@@ -603,14 +613,17 @@ const Membership = () => {
                               ? "أفضل رقم اتصال *"
                               : "Best Contact Number / أفضل رقم اتصال *"}
                           </Label>
-                          <Input
+                          <PhoneInput
                             id="phone"
                             name="phone"
-                            type="tel"
                             value={formData.phone}
-                            onChange={handleChange}
-                            placeholder="(555) 123-4567"
-                            className={errors.phone ? "border-destructive" : ""}
+                            onChange={(val) => {
+                              setFormData((prev) => ({ ...prev, phone: val }));
+                              if (errors.phone) {
+                                setErrors((prev) => ({ ...prev, phone: "" }));
+                              }
+                            }}
+                            error={!!errors.phone}
                           />
                           {errors.phone && (
                             <p className="text-sm text-destructive">{errors.phone}</p>
@@ -628,6 +641,7 @@ const Membership = () => {
                             type="email"
                             value={formData.email}
                             onChange={handleChange}
+                            onBlur={handleEmailBlur}
                             placeholder="your@email.com"
                             className={errors.email ? "border-destructive" : ""}
                           />

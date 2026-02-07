@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mail, MapPin, Send, CheckCircle } from "lucide-react";
+import { Mail, MapPin, Send, CheckCircle, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,16 +14,19 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { SocialLinks } from "@/components/SocialLinks";
 import { sendNotificationEmail } from "@/lib/email-notifications";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { isValidEmail, isValidUSPhone, formatPhoneForStorage } from "@/lib/validation";
+import { PhoneInput } from "@/components/PhoneInput";
 
 const Contact = () => {
   const { toast } = useToast();
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, language } = useLanguage();
   usePageTitle(t("contact.title"));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     message: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -33,21 +36,29 @@ const Contact = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
+      newErrors.name = language === "ar" ? "الاسم مطلوب" : "Name is required";
     } else if (formData.name.length > 100) {
-      newErrors.name = "Name must be less than 100 characters";
+      newErrors.name = language === "ar" ? "يجب أن يكون الاسم أقل من 100 حرف" : "Name must be less than 100 characters";
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
+      newErrors.email = language === "ar" ? "البريد الإلكتروني مطلوب" : "Email is required";
+    } else if (!isValidEmail(formData.email)) {
+      newErrors.email = language === "ar" ? "يرجى إدخال بريد إلكتروني صالح" : "Please enter a valid email address.";
+    }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = language === "ar" ? "رقم الهاتف مطلوب" : "Phone number is required";
+    } else if (!isValidUSPhone(formData.phone)) {
+      newErrors.phone = language === "ar"
+        ? "يرجى إدخال رقم هاتف أمريكي صالح (10 أرقام)"
+        : "Please enter a valid US phone number (10 digits).";
     }
 
     if (!formData.message.trim()) {
-      newErrors.message = "Message is required";
+      newErrors.message = language === "ar" ? "الرسالة مطلوبة" : "Message is required";
     } else if (formData.message.length > 1000) {
-      newErrors.message = "Message must be less than 1000 characters";
+      newErrors.message = language === "ar" ? "يجب أن تكون الرسالة أقل من 1000 حرف" : "Message must be less than 1000 characters";
     }
 
     setErrors(newErrors);
@@ -67,6 +78,7 @@ const Contact = () => {
       const submissionData = {
         name: formData.name.trim(),
         email: formData.email.trim(),
+        phone: formatPhoneForStorage(formData.phone),
         message: formData.message.trim(),
       };
 
@@ -82,12 +94,14 @@ const Contact = () => {
         title: t("contact.thankYou"),
         description: t("contact.submitted"),
       });
-      setFormData({ name: "", email: "", message: "" });
+      setFormData({ name: "", email: "", phone: "", message: "" });
     } catch (error) {
       console.error("Error submitting contact form:", error);
       toast({
-        title: "Submission Error",
-        description: "There was an error sending your message. Please try again.",
+        title: language === "ar" ? "خطأ في الإرسال" : "Submission Error",
+        description: language === "ar"
+          ? "حدث خطأ أثناء إرسال رسالتك. يرجى المحاولة مرة أخرى."
+          : "There was an error sending your message. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -102,6 +116,15 @@ const Contact = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const handleEmailBlur = () => {
+    if (formData.email.trim() && !isValidEmail(formData.email)) {
+      setErrors((prev) => ({
+        ...prev,
+        email: language === "ar" ? "يرجى إدخال بريد إلكتروني صالح" : "Please enter a valid email address.",
+      }));
     }
   };
 
@@ -228,7 +251,7 @@ const Contact = () => {
                   ) : (
                     <form onSubmit={handleSubmit} className={`space-y-6 ${isRTL ? 'text-right' : ''}`}>
                       <div className="space-y-2">
-                        <Label htmlFor="name">{t("contact.form.name")}</Label>
+                        <Label htmlFor="name">{t("contact.form.name")} *</Label>
                         <Input
                           id="name"
                           name="name"
@@ -244,13 +267,14 @@ const Contact = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="email">{t("contact.form.email")}</Label>
+                        <Label htmlFor="email">{t("contact.form.email")} *</Label>
                         <Input
                           id="email"
                           name="email"
                           type="email"
                           value={formData.email}
                           onChange={handleChange}
+                          onBlur={handleEmailBlur}
                           placeholder={t("contact.form.emailPlaceholder")}
                           className={errors.email ? "border-destructive" : ""}
                           dir="ltr"
@@ -261,7 +285,28 @@ const Contact = () => {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="message">{t("contact.form.message")}</Label>
+                        <Label htmlFor="phone">
+                          {language === "ar" ? "رقم الهاتف *" : "Phone Number / رقم الهاتف *"}
+                        </Label>
+                        <PhoneInput
+                          id="phone"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={(val) => {
+                            setFormData((prev) => ({ ...prev, phone: val }));
+                            if (errors.phone) {
+                              setErrors((prev) => ({ ...prev, phone: "" }));
+                            }
+                          }}
+                          error={!!errors.phone}
+                        />
+                        {errors.phone && (
+                          <p className="text-sm text-destructive">{errors.phone}</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="message">{t("contact.form.message")} *</Label>
                         <Textarea
                           id="message"
                           name="message"

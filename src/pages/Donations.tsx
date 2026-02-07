@@ -17,18 +17,21 @@ import { TransparencyBlock } from "@/components/TransparencyBlock";
 import { sendNotificationEmail } from "@/lib/email-notifications";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { isValidEmail, isValidUSPhone, formatPhoneForStorage } from "@/lib/validation";
+import { PhoneInput } from "@/components/PhoneInput";
 
 const ZELLE_EMAIL = "beiteenassociation.stl@gmail.com";
 
 const Donations = () => {
   const { toast } = useToast();
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, language } = useLanguage();
   usePageTitle(t("donate.title"));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     isAnonymous: false,
     donationAmount: "",
     intendedPaymentDate: "",
@@ -42,24 +45,46 @@ const Donations = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.isAnonymous && !formData.email.trim()) {
-      newErrors.email = "Email is required for non-anonymous donations";
-    } else if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
+      newErrors.email = language === "ar"
+        ? "البريد الإلكتروني مطلوب للتبرعات غير المجهولة"
+        : "Email is required for non-anonymous donations";
+    } else if (formData.email && !isValidEmail(formData.email)) {
+      newErrors.email = language === "ar"
+        ? "يرجى إدخال بريد إلكتروني صالح"
+        : "Please enter a valid email address.";
+    }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = language === "ar"
+        ? "رقم الهاتف مطلوب"
+        : "Phone number is required";
+    } else if (!isValidUSPhone(formData.phone)) {
+      newErrors.phone = language === "ar"
+        ? "يرجى إدخال رقم هاتف أمريكي صالح (10 أرقام)"
+        : "Please enter a valid US phone number (10 digits).";
     }
 
     if (!formData.donationAmount.trim()) {
-      newErrors.donationAmount = "Donation amount is required";
+      newErrors.donationAmount = language === "ar"
+        ? "مبلغ التبرع مطلوب"
+        : "Donation amount is required";
     } else {
       const amount = parseFloat(formData.donationAmount);
       if (isNaN(amount) || amount <= 0) {
-        newErrors.donationAmount = "Please enter a valid amount";
+        newErrors.donationAmount = language === "ar"
+          ? "يرجى إدخال مبلغ صالح"
+          : "Please enter a valid amount";
       } else if (amount > 1000000) {
-        newErrors.donationAmount = "Please contact us directly for large donations";
+        newErrors.donationAmount = language === "ar"
+          ? "يرجى التواصل معنا مباشرة للتبرعات الكبيرة"
+          : "Please contact us directly for large donations";
       }
     }
 
     if (!formData.acknowledged) {
-      newErrors.acknowledged = "Please acknowledge the manual verification process";
+      newErrors.acknowledged = language === "ar"
+        ? "يرجى الموافقة على عملية التحقق اليدوي"
+        : "Please acknowledge the manual verification process";
     }
 
     setErrors(newErrors);
@@ -79,6 +104,7 @@ const Donations = () => {
       const submissionData = {
         name: formData.name.trim() || null,
         email: formData.email.trim() || null,
+        phone: formatPhoneForStorage(formData.phone),
         is_anonymous: formData.isAnonymous,
         donation_amount: parseFloat(formData.donationAmount),
         intended_payment_date: formData.intendedPaymentDate || null,
@@ -124,6 +150,7 @@ const Donations = () => {
     setFormData({
       name: "",
       email: "",
+      phone: "",
       isAnonymous: false,
       donationAmount: "",
       intendedPaymentDate: "",
@@ -132,6 +159,15 @@ const Donations = () => {
     });
     setIsSubmitted(false);
     setErrors({});
+  };
+
+  const handleEmailBlur = () => {
+    if (formData.email.trim() && !isValidEmail(formData.email)) {
+      setErrors((prev) => ({
+        ...prev,
+        email: language === "ar" ? "يرجى إدخال بريد إلكتروني صالح" : "Please enter a valid email address.",
+      }));
+    }
   };
 
   return (
@@ -310,12 +346,34 @@ const Donations = () => {
                           type="email"
                           value={formData.email}
                           onChange={handleChange}
+                          onBlur={handleEmailBlur}
                           placeholder="your@email.com"
                           className={errors.email ? "border-destructive" : ""}
                           dir="ltr"
                         />
                         {errors.email && (
                           <p className="text-sm text-destructive">{errors.email}</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">
+                          {language === "ar" ? "رقم الهاتف *" : "Phone Number / رقم الهاتف *"}
+                        </Label>
+                        <PhoneInput
+                          id="phone"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={(val) => {
+                            setFormData((prev) => ({ ...prev, phone: val }));
+                            if (errors.phone) {
+                              setErrors((prev) => ({ ...prev, phone: "" }));
+                            }
+                          }}
+                          error={!!errors.phone}
+                        />
+                        {errors.phone && (
+                          <p className="text-sm text-destructive">{errors.phone}</p>
                         )}
                       </div>
 

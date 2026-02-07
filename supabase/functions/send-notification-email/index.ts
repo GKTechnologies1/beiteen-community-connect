@@ -105,11 +105,19 @@ const formatContactEmail = (data: Record<string, unknown>): { subject: string; h
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding: 10px 0; width: 120px;">
+                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; width: 120px;">
                     <strong style="color: #666; font-size: 13px;">Email</strong>
                   </td>
-                  <td style="padding: 10px 0; color: #333; font-size: 14px;">
+                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #333; font-size: 14px;">
                     <a href="mailto:${data.email}" style="color: #5a7a42; text-decoration: none;">${data.email || "Not provided"}</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; width: 120px;">
+                    <strong style="color: #666; font-size: 13px;">Phone</strong>
+                  </td>
+                  <td style="padding: 10px 0; color: #333; font-size: 14px;">
+                    ${data.phone || "Not provided"}
                   </td>
                 </tr>
               </table>
@@ -470,11 +478,19 @@ const formatDonationEmail = (data: Record<string, unknown>): { subject: string; 
                 </tr>
                 ` : ""}
                 <tr>
-                  <td style="padding: 10px 0; ${data.intended_payment_date ? 'border-bottom: 1px solid #eee;' : ''} width: 140px;">
+                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; width: 140px;">
                     <strong style="color: #666; font-size: 13px;">Email</strong>
                   </td>
-                  <td style="padding: 10px 0; ${data.intended_payment_date ? 'border-bottom: 1px solid #eee;' : ''} color: #333; font-size: 14px;">
+                  <td style="padding: 10px 0; border-bottom: 1px solid #eee; color: #333; font-size: 14px;">
                     ${data.email ? `<a href="mailto:${data.email}" style="color: #5a7a42; text-decoration: none;">${data.email}</a>` : "Not provided"}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 0; ${data.intended_payment_date ? 'border-bottom: 1px solid #eee;' : ''} width: 140px;">
+                    <strong style="color: #666; font-size: 13px;">Phone</strong>
+                  </td>
+                  <td style="padding: 10px 0; ${data.intended_payment_date ? 'border-bottom: 1px solid #eee;' : ''} color: #333; font-size: 14px;">
+                    ${data.phone || "Not provided"}
                   </td>
                 </tr>
                 ${data.intended_payment_date ? `
