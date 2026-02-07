@@ -13,10 +13,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SocialLinks } from "@/components/SocialLinks";
 import { sendNotificationEmail } from "@/lib/email-notifications";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 const Contact = () => {
   const { toast } = useToast();
   const { t, isRTL } = useLanguage();
+  usePageTitle(t("contact.title"));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({

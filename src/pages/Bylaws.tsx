@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { MotionSection } from "@/components/motion";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 // Full bylaws content structure (English only - legal document)
 const bylawsContent = [
@@ -158,6 +159,7 @@ Amendments shall take effect immediately upon adoption unless otherwise specifie
 
 const Bylaws = () => {
   const { t, isRTL } = useLanguage();
+  usePageTitle(t("bylaws.title"));
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
