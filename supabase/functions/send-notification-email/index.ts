@@ -140,6 +140,131 @@ const formatContactEmail = (data: Record<string, unknown>): { subject: string; h
   };
 };
 
+const formatHouseholdMembersTable = (data: Record<string, unknown>): string => {
+  // Try to parse structured household members data
+  if (data.household_members_data) {
+    try {
+      const members = JSON.parse(String(data.household_members_data)) as Array<{
+        name: string;
+        relationship: string;
+        dob: string;
+        age: number | string;
+        isCollegeStudent: boolean;
+        feeCategory: string;
+        fee: number;
+        fileUrls: string[];
+      }>;
+
+      if (members.length === 0) return "";
+
+      let tableRows = "";
+      for (const m of members) {
+        tableRows += `
+          <tr>
+            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px;">${m.name}</td>
+            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px;">${m.relationship}</td>
+            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px;">${m.dob}</td>
+            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; text-align: center;">${m.age}</td>
+            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; text-align: center;">
+              <span style="background: ${m.isCollegeStudent ? '#e8f5e9' : '#f5f5f5'}; color: ${m.isCollegeStudent ? '#2e7d32' : '#999'}; padding: 2px 8px; border-radius: 10px; font-size: 11px;">
+                ${m.isCollegeStudent ? "Yes" : "No"}
+              </span>
+            </td>
+            <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px;">
+              <span style="background: ${m.fee > 0 ? '#e8f5e9' : '#f5f5f5'}; color: ${m.fee > 0 ? '#5a7a42' : '#999'}; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500;">
+                ${m.feeCategory}
+              </span>
+            </td>
+          </tr>
+        `;
+        // Add file links row if any
+        if (m.fileUrls && m.fileUrls.length > 0) {
+          const fileLinks = m.fileUrls
+            .map((url: string, i: number) => `<a href="${url}" style="color: #1565c0; text-decoration: none; font-size: 11px;">📄 ID ${i + 1}</a>`)
+            .join(" &nbsp;|&nbsp; ");
+          tableRows += `
+            <tr>
+              <td colspan="6" style="padding: 4px 10px 8px 30px; border-bottom: 1px solid #ddd; background: #fafafa;">
+                <span style="font-size: 11px; color: #666;">College ID(s): </span>${fileLinks}
+              </td>
+            </tr>
+          `;
+        }
+      }
+
+      // Fee breakdown
+      let feeBreakdownHtml = "";
+      if (data.fee_breakdown) {
+        try {
+          const fb = JSON.parse(String(data.fee_breakdown));
+          feeBreakdownHtml = `
+            <div style="margin-top: 15px; padding: 15px; background: linear-gradient(135deg, #5a7a42 0%, #4a6a35 100%); border-radius: 10px; color: white;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 5px 0; font-size: 13px; color: rgba(255,255,255,0.9);">Household Base</td>
+                  <td style="padding: 5px 0; font-size: 13px; text-align: right; color: white; font-weight: 500;">$${fb.householdBase}</td>
+                </tr>
+                ${fb.adult21PlusCount > 0 ? `
+                <tr>
+                  <td style="padding: 5px 0; font-size: 13px; color: rgba(255,255,255,0.9);">21+ Not in College (${fb.adult21PlusCount} × $100)</td>
+                  <td style="padding: 5px 0; font-size: 13px; text-align: right; color: white; font-weight: 500;">$${fb.adult21Plus}</td>
+                </tr>` : ""}
+                ${fb.collegeStudentCount > 0 ? `
+                <tr>
+                  <td style="padding: 5px 0; font-size: 13px; color: rgba(255,255,255,0.9);">College Students (${fb.collegeStudentCount} × $50)</td>
+                  <td style="padding: 5px 0; font-size: 13px; text-align: right; color: white; font-weight: 500;">$${fb.collegeStudents}</td>
+                </tr>` : ""}
+                <tr>
+                  <td style="padding: 10px 0 5px; font-size: 16px; font-weight: 700; color: white; border-top: 1px solid rgba(255,255,255,0.3);">TOTAL ESTIMATED FEE</td>
+                  <td style="padding: 10px 0 5px; font-size: 20px; font-weight: 700; text-align: right; color: white; border-top: 1px solid rgba(255,255,255,0.3);">$${fb.total}</td>
+                </tr>
+              </table>
+            </div>
+          `;
+        } catch (_e) { /* ignore parse errors */ }
+      }
+
+      return `
+        <div style="background: #fafafa; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #eee;">
+          <h3 style="margin: 0 0 15px; color: #5a7a42; font-size: 16px; border-bottom: 2px solid #5a7a42; padding-bottom: 8px;">
+            👨‍👩‍👧‍👦 Household Members (${members.length})
+          </h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background: #e8f5e9;">
+                <th style="padding: 10px; text-align: left; font-size: 12px; color: #5a7a42; text-transform: uppercase; font-weight: 600;">Name</th>
+                <th style="padding: 10px; text-align: left; font-size: 12px; color: #5a7a42; text-transform: uppercase; font-weight: 600;">Relationship</th>
+                <th style="padding: 10px; text-align: left; font-size: 12px; color: #5a7a42; text-transform: uppercase; font-weight: 600;">DOB</th>
+                <th style="padding: 10px; text-align: center; font-size: 12px; color: #5a7a42; text-transform: uppercase; font-weight: 600;">Age</th>
+                <th style="padding: 10px; text-align: center; font-size: 12px; color: #5a7a42; text-transform: uppercase; font-weight: 600;">College</th>
+                <th style="padding: 10px; text-align: left; font-size: 12px; color: #5a7a42; text-transform: uppercase; font-weight: 600;">Fee Category</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRows}
+            </tbody>
+          </table>
+          ${feeBreakdownHtml}
+        </div>
+      `;
+    } catch (e) {
+      console.error("Failed to parse household_members_data:", e);
+    }
+  }
+
+  // Fallback to plain text display
+  if (data.household_members) {
+    return `
+      <div style="background: linear-gradient(135deg, #f5f7f0 0%, #e8ede3 100%); border-radius: 12px; padding: 20px; margin-bottom: 20px; border-left: 4px solid #5a7a42;">
+        <h3 style="margin: 0 0 12px; color: #5a7a42; font-size: 16px;">👨‍👩‍👧‍👦 Household Members</h3>
+        <p style="margin: 0; color: #333; font-size: 14px; line-height: 1.7; white-space: pre-wrap;">${String(data.household_members).replace(/\n/g, "<br>")}</p>
+      </div>
+    `;
+  }
+
+  return "";
+};
+
 const formatMembershipEmail = (data: Record<string, unknown>): { subject: string; html: string; replyTo?: string } => {
   const timestamp = new Date().toLocaleString("en-US", { 
     timeZone: "America/Chicago",
@@ -152,9 +277,10 @@ const formatMembershipEmail = (data: Record<string, unknown>): { subject: string
   });
   
   const membershipType = data.membership_type === "college" ? "College Student" : "Household";
+  const estimatedFee = data.estimated_total_fee ? `$${data.estimated_total_fee}` : "N/A";
   
   return {
-    subject: `🎉 New Membership Application - ${data.full_name || "New Applicant"}`,
+    subject: `🎉 New Membership Application - ${data.full_name || "New Applicant"} (Est. ${estimatedFee})`,
     replyTo: data.email ? String(data.email) : undefined,
     html: `
       <!DOCTYPE html>
@@ -171,7 +297,7 @@ const formatMembershipEmail = (data: Record<string, unknown>): { subject: string
             <!-- Membership Type Badge -->
             <div style="text-align: center; margin-bottom: 25px;">
               <span style="background: linear-gradient(135deg, #5a7a42 0%, #4a6a35 100%); color: white; padding: 10px 25px; border-radius: 25px; font-size: 14px; font-weight: 600; display: inline-block; box-shadow: 0 3px 10px rgba(90, 122, 66, 0.3);">
-                ${membershipType} Membership
+                ${membershipType} Membership — Est. ${estimatedFee}
               </span>
             </div>
             
@@ -255,13 +381,8 @@ const formatMembershipEmail = (data: Record<string, unknown>): { subject: string
               </p>
             </div>
             
-            <!-- Household Members -->
-            ${data.household_members ? `
-            <div style="background: linear-gradient(135deg, #f5f7f0 0%, #e8ede3 100%); border-radius: 12px; padding: 20px; margin-bottom: 20px; border-left: 4px solid #5a7a42;">
-              <h3 style="margin: 0 0 12px; color: #5a7a42; font-size: 16px;">👨‍👩‍👧‍👦 Household Members</h3>
-              <p style="margin: 0; color: #333; font-size: 14px; line-height: 1.7; white-space: pre-wrap;">${String(data.household_members).replace(/\n/g, "<br>")}</p>
-            </div>
-            ` : ""}
+            <!-- Household Members Table -->
+            ${formatHouseholdMembersTable(data)}
             
             <!-- Payment Info -->
             <div style="background: #fff3e0; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #ffe0b2;">
@@ -272,20 +393,6 @@ const formatMembershipEmail = (data: Record<string, unknown>): { subject: string
                 <strong>Zelle Contact:</strong> ${data.zelle_contact || "Not provided"}
               </p>
             </div>
-            
-            <!-- College ID -->
-            ${data.college_id_urls && Array.isArray(data.college_id_urls) && data.college_id_urls.length > 0 ? `
-            <div style="background: #e3f2fd; border-radius: 12px; padding: 20px; border: 1px solid #bbdefb;">
-              <h3 style="margin: 0 0 12px; color: #1565c0; font-size: 16px;">🎓 College ID Uploads</h3>
-              <ul style="margin: 0; padding-left: 20px;">
-                ${(data.college_id_urls as string[]).map((url: string, i: number) => `
-                  <li style="margin: 8px 0;">
-                    <a href="${url}" style="color: #1565c0; text-decoration: none; font-size: 13px;">View Document ${i + 1} →</a>
-                  </li>
-                `).join("")}
-              </ul>
-            </div>
-            ` : ""}
           </div>
           
           ${getEmailFooter(data.full_name ? String(data.full_name) : undefined)}
