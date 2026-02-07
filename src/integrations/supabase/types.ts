@@ -53,6 +53,7 @@ export type Database = {
           message: string | null
           name: string | null
           payment_verified: boolean
+          phone: string | null
         }
         Insert: {
           acknowledged?: boolean
@@ -65,6 +66,7 @@ export type Database = {
           message?: string | null
           name?: string | null
           payment_verified?: boolean
+          phone?: string | null
         }
         Update: {
           acknowledged?: boolean
@@ -77,6 +79,7 @@ export type Database = {
           message?: string | null
           name?: string | null
           payment_verified?: boolean
+          phone?: string | null
         }
         Relationships: []
       }
