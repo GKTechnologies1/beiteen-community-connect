@@ -355,7 +355,7 @@ const Membership = () => {
           <div className="max-w-6xl mx-auto">
             {isSubmitted ? (
               <MotionSection>
-                <MotionCard className="card-heritage p-8 md:p-12">
+                <MotionCard disableTilt className="card-heritage p-8 md:p-12">
                   <motion.div
                     className="space-y-8 text-center"
                     initial={{ opacity: 0, scale: 0.9 }}
@@ -450,7 +450,7 @@ const Membership = () => {
 
                 {/* Form Section */}
                 <MotionSection variant="fadeUp" delay={0.2} className="lg:col-span-3">
-                  <MotionCard className="card-heritage p-6 md:p-10">
+                  <MotionCard disableTilt className="card-heritage p-6 md:p-10">
                     <form onSubmit={handleSubmit} className="space-y-6">
                       {/* Family Name */}
                       <div className="space-y-2">

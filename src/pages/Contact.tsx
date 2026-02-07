@@ -196,7 +196,7 @@ const Contact = () => {
 
               {/* Contact Form */}
               <MotionSection variant="fadeUp" delay={0.2}>
-                <MotionCard className="card-heritage p-8">
+                <MotionCard disableTilt className="card-heritage p-8">
                   {isSubmitted ? (
                     <motion.div
                       className={`text-center py-8 ${isRTL ? 'text-right' : ''}`}
