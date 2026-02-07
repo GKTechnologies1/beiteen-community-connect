@@ -7,6 +7,7 @@ interface MotionCardProps {
   className?: string;
   tiltDegrees?: number;
   scale?: number;
+  disableTilt?: boolean;
 }
 
 export const MotionCard = ({
@@ -14,6 +15,7 @@ export const MotionCard = ({
   className = "",
   tiltDegrees = 3,
   scale = 1.02,
+  disableTilt = false,
 }: MotionCardProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
@@ -26,7 +28,7 @@ export const MotionCard = ({
   const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-tiltDegrees, tiltDegrees]), springConfig);
 
   const handleMouseMove = (event: MouseEvent<HTMLDivElement>) => {
-    if (prefersReducedMotion || !ref.current) return;
+    if (prefersReducedMotion || disableTilt || !ref.current) return;
 
     const rect = ref.current.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
@@ -41,13 +43,13 @@ export const MotionCard = ({
     y.set(0);
   };
 
-  // Simplified version for reduced motion or mobile
-  if (prefersReducedMotion) {
+  // Simplified version for reduced motion, mobile, or form cards (no tilt)
+  if (prefersReducedMotion || disableTilt) {
     return (
       <motion.div
         className={className}
-        whileHover={{ scale: 1.01 }}
-        transition={{ duration: 0.2 }}
+        whileHover={{ scale: disableTilt ? 1.01 : 1.01 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
       >
         {children}
       </motion.div>
