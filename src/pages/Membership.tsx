@@ -1,8 +1,7 @@
 import { useState, useRef } from "react";
-import { Users, CheckCircle, Upload, X, AlertCircle } from "lucide-react";
+import { Users, CheckCircle, AlertCircle, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -27,10 +26,16 @@ import { sendNotificationEmail } from "@/lib/email-notifications";
 import { MembershipFees } from "@/components/MembershipFees";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { HouseholdMember, createEmptyMember } from "@/components/membership/types";
+import { HouseholdMemberRow } from "@/components/membership/HouseholdMemberRow";
+import { FeeSummary } from "@/components/membership/FeeSummary";
+import {
+  calculateTotalFee,
+  serializeMembersForDB,
+  serializeMembersForEmail,
+} from "@/components/membership/utils";
 
 const ZELLE_EMAIL = "beiteenassociation.stl@gmail.com";
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const MAX_FILES = 5;
 
 interface FormData {
   familyName: string;
@@ -43,7 +48,6 @@ interface FormData {
   city: string;
   state: string;
   zipCode: string;
-  householdMembers: string;
   zelleContact: string;
   acknowledged: boolean;
 }
@@ -54,9 +58,8 @@ const Membership = () => {
   usePageTitle(language === "ar" ? "تسجيل العضوية" : "Membership");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [files, setFiles] = useState<File[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  
+  const [members, setMembers] = useState<HouseholdMember[]>([createEmptyMember()]);
+
   const [formData, setFormData] = useState<FormData>({
     familyName: "",
     headFirstName: "",
@@ -68,165 +71,172 @@ const Membership = () => {
     city: "",
     state: "",
     zipCode: "",
-    householdMembers: "",
     zelleContact: "",
     acknowledged: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const prefersReducedMotion = useReducedMotion();
 
+  // -- Member management --
+  const addMember = () => {
+    setMembers((prev) => [...prev, createEmptyMember()]);
+  };
+
+  const removeMember = (id: string) => {
+    setMembers((prev) => prev.filter((m) => m.id !== id));
+  };
+
+  const updateMember = (id: string, updates: Partial<HouseholdMember>) => {
+    setMembers((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, ...updates } : m))
+    );
+    // Clear member-specific errors
+    const errorPrefix = `member_${id}`;
+    setErrors((prev) => {
+      const next = { ...prev };
+      Object.keys(next).forEach((key) => {
+        if (key.startsWith(errorPrefix)) delete next[key];
+      });
+      return next;
+    });
+  };
+
+  // -- Validation --
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    // Family Name
     if (!formData.familyName.trim()) {
-      newErrors.familyName = "Family name is required / اسم العائلة مطلوب";
+      newErrors.familyName = language === "ar" ? "اسم العائلة مطلوب" : "Family name is required";
     } else if (formData.familyName.length > 100) {
       newErrors.familyName = "Name must be less than 100 characters";
     }
 
-    // Head of Household First Name
     if (!formData.headFirstName.trim()) {
-      newErrors.headFirstName = "First name is required / الاسم الأول مطلوب";
+      newErrors.headFirstName = language === "ar" ? "الاسم الأول مطلوب" : "First name is required";
     }
 
-    // Head of Household Middle Name
     if (!formData.headMiddleName.trim()) {
-      newErrors.headMiddleName = "Middle name is required / اسم الأب مطلوب";
+      newErrors.headMiddleName = language === "ar" ? "اسم الأب مطلوب" : "Middle name is required";
     }
 
-    // Date of Birth
     if (!formData.headDob) {
-      newErrors.headDob = "Date of birth is required / تاريخ الميلاد مطلوب";
+      newErrors.headDob = language === "ar" ? "تاريخ الميلاد مطلوب" : "Date of birth is required";
     }
 
-    // Phone
     if (!formData.phone.trim()) {
-      newErrors.phone = "Phone number is required / رقم الهاتف مطلوب";
+      newErrors.phone = language === "ar" ? "رقم الهاتف مطلوب" : "Phone number is required";
     } else if (!isValidUSPhone(formData.phone)) {
-      newErrors.phone = "Please enter a valid US phone number";
+      newErrors.phone = language === "ar" ? "يرجى إدخال رقم هاتف أمريكي صالح" : "Please enter a valid US phone number";
     }
 
-    // Email
     if (!formData.email.trim()) {
-      newErrors.email = "Email is required / البريد الإلكتروني مطلوب";
+      newErrors.email = language === "ar" ? "البريد الإلكتروني مطلوب" : "Email is required";
     } else if (!isValidEmail(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
+      newErrors.email = language === "ar" ? "يرجى إدخال بريد إلكتروني صالح" : "Please enter a valid email address";
     }
 
-    // Street Address
     if (!formData.streetAddress.trim()) {
-      newErrors.streetAddress = "Street address is required / العنوان مطلوب";
+      newErrors.streetAddress = language === "ar" ? "العنوان مطلوب" : "Street address is required";
     }
 
-    // City
     if (!formData.city.trim()) {
-      newErrors.city = "City is required / المدينة مطلوبة";
+      newErrors.city = language === "ar" ? "المدينة مطلوبة" : "City is required";
     }
 
-    // State
     if (!formData.state) {
-      newErrors.state = "State is required / الولاية مطلوبة";
+      newErrors.state = language === "ar" ? "الولاية مطلوبة" : "State is required";
     }
 
-    // Zip Code
     if (!formData.zipCode.trim()) {
-      newErrors.zipCode = "ZIP code is required / الرمز البريدي مطلوب";
+      newErrors.zipCode = language === "ar" ? "الرمز البريدي مطلوب" : "ZIP code is required";
     } else if (!isValidZipCode(formData.zipCode)) {
       newErrors.zipCode = "Please enter a valid ZIP code (e.g., 12345 or 12345-6789)";
     }
 
-    // Household Members
-    if (!formData.householdMembers.trim()) {
-      newErrors.householdMembers = "Please list household members / يرجى إدراج أفراد الأسرة";
-    }
-
-    // Zelle Contact
     if (!formData.zelleContact.trim()) {
-      newErrors.zelleContact = "Zelle contact is required / معلومات الاتصال مطلوبة";
+      newErrors.zelleContact = language === "ar" ? "معلومات الاتصال مطلوبة" : "Zelle contact is required";
     } else if (!isValidZelleContact(formData.zelleContact)) {
       newErrors.zelleContact = "Please enter a valid email or phone number for Zelle";
     }
 
-    // Acknowledgment
     if (!formData.acknowledged) {
-      newErrors.acknowledged = "Please acknowledge the payment process";
+      newErrors.acknowledged = language === "ar" ? "يرجى الموافقة على عملية الدفع" : "Please acknowledge the payment process";
+    }
+
+    // Validate each household member
+    for (const member of members) {
+      const prefix = `member_${member.id}`;
+
+      if (!member.fullName.trim()) {
+        newErrors[`${prefix}_fullName`] = language === "ar" ? "الاسم الكامل مطلوب" : "Full name is required";
+      }
+
+      if (!member.relationship) {
+        newErrors[`${prefix}_relationship`] = language === "ar" ? "صلة القرابة مطلوبة" : "Relationship is required";
+      }
+
+      if (member.relationship === "other" && !member.otherRelationship.trim()) {
+        newErrors[`${prefix}_otherRelationship`] = language === "ar" ? "يرجى تحديد صلة القرابة" : "Please specify the relationship";
+      }
+
+      if (!member.dob) {
+        newErrors[`${prefix}_dob`] = language === "ar" ? "تاريخ الميلاد مطلوب" : "Date of birth is required";
+      }
+
+      if (member.isCollegeStudent && member.collegeFiles.length === 0) {
+        newErrors[`${prefix}_collegeFiles`] = language === "ar"
+          ? "يرجى تحميل هوية طالب صالحة"
+          : "Please upload a valid student ID";
+      }
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = Array.from(e.target.files || []);
-    
-    // Validate file count
-    if (files.length + selectedFiles.length > MAX_FILES) {
-      toast({
-        title: "Too many files",
-        description: `You can upload a maximum of ${MAX_FILES} files.`,
-        variant: "destructive",
-      });
-      return;
-    }
+  // -- File upload --
+  const uploadAllFiles = async (): Promise<Record<string, string[]>> => {
+    const fileUrlMap: Record<string, string[]> = {};
 
-    // Validate file sizes
-    const validFiles = selectedFiles.filter(file => {
-      if (file.size > MAX_FILE_SIZE) {
-        toast({
-          title: "File too large",
-          description: `${file.name} exceeds the 10MB limit.`,
-          variant: "destructive",
-        });
-        return false;
-      }
-      return true;
-    });
+    for (const member of members) {
+      if (member.collegeFiles.length === 0) continue;
+      const urls: string[] = [];
 
-    setFiles(prev => [...prev, ...validFiles]);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
+      for (const file of member.collegeFiles) {
+        const fileExt = file.name.split(".").pop();
+        const safeName = member.fullName.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 30);
+        const fileName = `${safeName}_${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `college-ids/${fileName}`;
 
-  const removeFile = (index: number) => {
-    setFiles(prev => prev.filter((_, i) => i !== index));
-  };
+        const { error } = await supabase.storage
+          .from("membership-documents")
+          .upload(filePath, file);
 
-  const uploadFiles = async (): Promise<string[]> => {
-    const uploadedUrls: string[] = [];
-    
-    for (const file of files) {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `college-ids/${fileName}`;
+        if (error) {
+          console.error("Error uploading file:", error);
+          throw new Error(`Failed to upload ${file.name}`);
+        }
 
-      const { error } = await supabase.storage
-        .from('membership-documents')
-        .upload(filePath, file);
-
-      if (error) {
-        console.error('Error uploading file:', error);
-        throw new Error(`Failed to upload ${file.name}`);
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from("membership-documents").getPublicUrl(filePath);
+        urls.push(publicUrl);
       }
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('membership-documents')
-        .getPublicUrl(filePath);
-
-      uploadedUrls.push(publicUrl);
+      fileUrlMap[member.id] = urls;
     }
 
-    return uploadedUrls;
+    return fileUrlMap;
   };
 
+  // -- Submit --
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
       toast({
-        title: "Please fix the errors",
-        description: "Some required fields are missing or invalid.",
+        title: language === "ar" ? "يرجى تصحيح الأخطاء" : "Please fix the errors",
+        description: language === "ar" ? "بعض الحقول المطلوبة مفقودة أو غير صالحة." : "Some required fields are missing or invalid.",
         variant: "destructive",
       });
       return;
@@ -235,49 +245,62 @@ const Membership = () => {
     setIsSubmitting(true);
 
     try {
-      // Upload files first
-      let collegeIdUrls: string[] = [];
-      if (files.length > 0) {
-        collegeIdUrls = await uploadFiles();
-      }
+      // Upload all college ID files
+      const fileUrlMap = await uploadAllFiles();
+      const allUrls = Object.values(fileUrlMap).flat();
+
+      // Prepare structured member data for email
+      const membersForEmail = serializeMembersForEmail(members, fileUrlMap);
+      const feeBreakdown = calculateTotalFee(members);
 
       const submissionData = {
         full_name: `${formData.headFirstName} ${formData.headMiddleName} ${formData.familyName}`.trim(),
         family_name: formData.familyName.trim(),
         head_first_name: formData.headFirstName.trim(),
         head_middle_name: formData.headMiddleName.trim(),
-        head_dob: formData.headDob?.toISOString().split('T')[0],
+        head_dob: formData.headDob?.toISOString().split("T")[0],
         phone: formData.phone.trim(),
         email: formData.email.trim(),
         street_address: formData.streetAddress.trim(),
         city: formData.city.trim(),
         state: formData.state,
         zip_code: formData.zipCode.trim(),
-        household_members: formData.householdMembers.trim(),
-        household_notes: formData.householdMembers.trim(),
-        college_id_urls: collegeIdUrls.length > 0 ? collegeIdUrls : null,
+        household_members: serializeMembersForDB(members),
+        household_notes: JSON.stringify({
+          members: membersForEmail,
+          fee: feeBreakdown,
+        }),
+        college_id_urls: allUrls.length > 0 ? allUrls : null,
         zelle_contact: formData.zelleContact.trim(),
         membership_type: "household",
         acknowledged: formData.acknowledged,
       };
 
       const { error } = await supabase.from("membership_submissions").insert(submissionData);
-
       if (error) throw error;
 
-      // Send email notification (don't block on failure)
-      sendNotificationEmail("membership", submissionData).catch(console.error);
+      // Send email notification with structured member data
+      sendNotificationEmail("membership", {
+        ...submissionData,
+        household_members_data: JSON.stringify(membersForEmail),
+        estimated_total_fee: feeBreakdown.total,
+        fee_breakdown: JSON.stringify(feeBreakdown),
+      }).catch(console.error);
 
       setIsSubmitted(true);
       toast({
-        title: "Membership Form Submitted!",
-        description: "Please complete your payment via Zelle using the details below.",
+        title: language === "ar" ? "تم تقديم نموذج العضوية!" : "Membership Form Submitted!",
+        description: language === "ar"
+          ? "يرجى إكمال الدفع عبر Zelle باستخدام التفاصيل أدناه."
+          : "Please complete your payment via Zelle using the details below.",
       });
     } catch (error) {
       console.error("Error submitting membership form:", error);
       toast({
-        title: "Submission Error",
-        description: "There was an error submitting your form. Please try again.",
+        title: language === "ar" ? "خطأ في الإرسال" : "Submission Error",
+        description: language === "ar"
+          ? "حدث خطأ أثناء إرسال النموذج. يرجى المحاولة مرة أخرى."
+          : "There was an error submitting your form. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -285,9 +308,7 @@ const Membership = () => {
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
@@ -307,14 +328,15 @@ const Membership = () => {
       city: "",
       state: "",
       zipCode: "",
-      householdMembers: "",
       zelleContact: "",
       acknowledged: false,
     });
-    setFiles([]);
+    setMembers([createEmptyMember()]);
     setIsSubmitted(false);
     setErrors({});
   };
+
+  const feeBreakdown = calculateTotalFee(members);
 
   return (
     <Layout>
@@ -326,13 +348,17 @@ const Membership = () => {
               <Users className="h-8 w-8" />
             </div>
             <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground mb-6">
-              Membership Sign-Up
+              {language === "ar" ? "تسجيل العضوية" : "Membership Sign-Up"}
             </h1>
-            <h2 className="font-heading text-2xl md:text-3xl text-primary mb-4" dir="rtl">
-              تسجيل العضوية
-            </h2>
+            {language !== "ar" && (
+              <h2 className="font-heading text-2xl md:text-3xl text-primary mb-4" dir="rtl">
+                تسجيل العضوية
+              </h2>
+            )}
             <p className="text-lg text-muted-foreground">
-              Join the Beiteen Association U.S.A. and be part of our vibrant community.
+              {language === "ar"
+                ? "انضم إلى جمعية بيتين في الولايات المتحدة وكن جزءاً من مجتمعنا النابض بالحياة."
+                : "Join the Beiteen Association U.S.A. and be part of our vibrant community."}
             </p>
           </MotionSection>
         </div>
@@ -370,41 +396,59 @@ const Membership = () => {
                     >
                       <CheckCircle className="h-10 w-10" />
                     </motion.div>
-                    
+
                     <div>
                       <h3 className="font-heading text-2xl font-semibold text-foreground mb-2">
-                        Thank You!
+                        {language === "ar" ? "شكراً لك!" : "Thank You!"}
                       </h3>
                       <p className="text-lg text-muted-foreground mb-2">
-                        Your membership form has been submitted successfully.
+                        {language === "ar"
+                          ? "تم تقديم نموذج عضويتك بنجاح."
+                          : "Your membership form has been submitted successfully."}
                       </p>
                       <p className="text-muted-foreground">
-                        Thank you for your inquiry/submission. A member of our team will respond within 2 business days.
+                        {language === "ar"
+                          ? "شكراً لاستفسارك/تقديمك. سيرد أحد أعضاء فريقنا خلال يومي عمل."
+                          : "Thank you for your inquiry/submission. A member of our team will respond within 2 business days."}
                       </p>
+                    </div>
+
+                    {/* Estimated Fee */}
+                    <div className="p-4 bg-primary/5 rounded-lg inline-block">
+                      <p className="text-sm text-muted-foreground mb-1">
+                        {language === "ar" ? "إجمالي الرسوم المقدرة" : "Estimated Total Fee"}
+                      </p>
+                      <p className="text-2xl font-bold text-primary">${feeBreakdown.total}</p>
                     </div>
 
                     {/* Zelle Payment Details */}
                     <div className="p-8 bg-muted rounded-xl space-y-6">
                       <h4 className="font-heading text-xl font-semibold text-foreground">
-                        Complete Payment via Zelle
+                        {language === "ar" ? "أكمل الدفع عبر Zelle" : "Complete Payment via Zelle"}
                       </h4>
-                      <img 
-                        src={zelleQR} 
-                        alt="Zelle QR Code" 
+                      <img
+                        src={zelleQR}
+                        alt="Zelle QR Code"
                         className="w-56 h-56 mx-auto border border-border rounded-lg shadow-sm"
                       />
                       <div>
-                        <p className="text-sm text-muted-foreground mb-1">Send membership payment via Zelle to:</p>
+                        <p className="text-sm text-muted-foreground mb-1">
+                          {language === "ar"
+                            ? "أرسل دفعة العضوية عبر Zelle إلى:"
+                            : "Send membership payment via Zelle to:"}
+                        </p>
                         <p className="text-lg font-medium text-foreground">{ZELLE_EMAIL}</p>
                       </div>
                       <p className="text-sm text-muted-foreground bg-primary/5 p-4 rounded-lg">
-                        <strong>Note:</strong> We will match your payment to your submission details. 
-                        Your membership will be activated after we verify your payment (typically within 2 business days).
+                        <strong>{language === "ar" ? "ملاحظة:" : "Note:"}</strong>{" "}
+                        {language === "ar"
+                          ? "سنطابق دفعتك مع تفاصيل تقديمك. سيتم تفعيل عضويتك بعد التحقق من دفعتك (عادةً خلال يومي عمل)."
+                          : "We will match your payment to your submission details. Your membership will be activated after we verify your payment (typically within 2 business days)."}
                       </p>
                     </div>
 
                     <Button variant="outline" onClick={resetForm} className="w-full max-w-xs">
-                      Submit Another Membership
+                      {language === "ar" ? "تقديم عضوية أخرى" : "Submit Another Membership"}
                     </Button>
                   </motion.div>
                 </MotionCard>
@@ -415,35 +459,50 @@ const Membership = () => {
                 <MotionSection variant="fadeUp" className="lg:col-span-1 space-y-6">
                   <MotionCard className="card-heritage p-6">
                     <h3 className="font-heading text-lg font-semibold text-foreground mb-4">
-                      Membership Benefits
+                      {language === "ar" ? "مزايا العضوية" : "Membership Benefits"}
                     </h3>
                     <ul className="space-y-3 text-sm text-muted-foreground">
                       <li className="flex items-start gap-3">
                         <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                        <span>Access to community events and gatherings</span>
+                        <span>
+                          {language === "ar"
+                            ? "الوصول إلى الفعاليات والتجمعات المجتمعية"
+                            : "Access to community events and gatherings"}
+                        </span>
                       </li>
                       <li className="flex items-start gap-3">
                         <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                        <span>Voting rights in association decisions</span>
+                        <span>
+                          {language === "ar"
+                            ? "حقوق التصويت في قرارات الجمعية"
+                            : "Voting rights in association decisions"}
+                        </span>
                       </li>
                       <li className="flex items-start gap-3">
                         <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                        <span>Newsletter and community updates</span>
+                        <span>
+                          {language === "ar"
+                            ? "النشرة الإخبارية وتحديثات المجتمع"
+                            : "Newsletter and community updates"}
+                        </span>
                       </li>
                       <li className="flex items-start gap-3">
                         <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                        <span>Support community initiatives</span>
+                        <span>
+                          {language === "ar" ? "دعم المبادرات المجتمعية" : "Support community initiatives"}
+                        </span>
                       </li>
                     </ul>
                   </MotionCard>
 
                   <MotionCard className="p-6 bg-primary/5 border border-primary/20 rounded-lg">
                     <h3 className="font-heading text-lg font-semibold text-foreground mb-2">
-                      Payment via Zelle
+                      {language === "ar" ? "الدفع عبر Zelle" : "Payment via Zelle"}
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      After submitting this form, you'll receive Zelle payment instructions. 
-                      We will match your payment to your submission details.
+                      {language === "ar"
+                        ? "بعد تقديم هذا النموذج، ستتلقى تعليمات الدفع عبر Zelle. سنطابق دفعتك مع تفاصيل تقديمك."
+                        : "After submitting this form, you'll receive Zelle payment instructions. We will match your payment to your submission details."}
                     </p>
                   </MotionCard>
                 </MotionSection>
@@ -455,14 +514,16 @@ const Membership = () => {
                       {/* Family Name */}
                       <div className="space-y-2">
                         <Label htmlFor="familyName">
-                          Family Name (Last Name) / اسم العائلة (اسم الأخير) *
+                          {language === "ar"
+                            ? "اسم العائلة (اسم الأخير) *"
+                            : "Family Name (Last Name) / اسم العائلة (اسم الأخير) *"}
                         </Label>
                         <Input
                           id="familyName"
                           name="familyName"
                           value={formData.familyName}
                           onChange={handleChange}
-                          placeholder="Enter family name"
+                          placeholder={language === "ar" ? "أدخل اسم العائلة" : "Enter family name"}
                           className={errors.familyName ? "border-destructive" : ""}
                         />
                         {errors.familyName && (
@@ -474,14 +535,16 @@ const Membership = () => {
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="headFirstName">
-                            Head of Household (First Name) / رب الأسرة (الاسم الأول) *
+                            {language === "ar"
+                              ? "رب الأسرة (الاسم الأول) *"
+                              : "Head of Household (First Name) / رب الأسرة (الاسم الأول) *"}
                           </Label>
                           <Input
                             id="headFirstName"
                             name="headFirstName"
                             value={formData.headFirstName}
                             onChange={handleChange}
-                            placeholder="First name"
+                            placeholder={language === "ar" ? "الاسم الأول" : "First name"}
                             className={errors.headFirstName ? "border-destructive" : ""}
                           />
                           {errors.headFirstName && (
@@ -490,14 +553,16 @@ const Membership = () => {
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="headMiddleName">
-                            Head of Household (Middle Name) / رب الأسرة (اسم الأب) *
+                            {language === "ar"
+                              ? "رب الأسرة (اسم الأب) *"
+                              : "Head of Household (Middle Name) / رب الأسرة (اسم الأب) *"}
                           </Label>
                           <Input
                             id="headMiddleName"
                             name="headMiddleName"
                             value={formData.headMiddleName}
                             onChange={handleChange}
-                            placeholder="Middle name"
+                            placeholder={language === "ar" ? "اسم الأب" : "Middle name"}
                             className={errors.headMiddleName ? "border-destructive" : ""}
                           />
                           {errors.headMiddleName && (
@@ -509,14 +574,16 @@ const Membership = () => {
                       {/* Date of Birth */}
                       <div className="space-y-2">
                         <Label>
-                          Head of Household Date of Birth / تاريخ ميلاد رب الأسرة *
+                          {language === "ar"
+                            ? "تاريخ ميلاد رب الأسرة *"
+                            : "Head of Household Date of Birth / تاريخ ميلاد رب الأسرة *"}
                         </Label>
                         <DOBPicker
                           value={formData.headDob}
                           onChange={(date) => {
-                            setFormData(prev => ({ ...prev, headDob: date }));
+                            setFormData((prev) => ({ ...prev, headDob: date }));
                             if (errors.headDob) {
-                              setErrors(prev => ({ ...prev, headDob: "" }));
+                              setErrors((prev) => ({ ...prev, headDob: "" }));
                             }
                           }}
                           error={!!errors.headDob}
@@ -532,7 +599,9 @@ const Membership = () => {
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="phone">
-                            Best Contact Number / أفضل رقم اتصال *
+                            {language === "ar"
+                              ? "أفضل رقم اتصال *"
+                              : "Best Contact Number / أفضل رقم اتصال *"}
                           </Label>
                           <Input
                             id="phone"
@@ -549,7 +618,9 @@ const Membership = () => {
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="email">
-                            Email Address / عنوان البريد الإلكتروني *
+                            {language === "ar"
+                              ? "عنوان البريد الإلكتروني *"
+                              : "Email Address / عنوان البريد الإلكتروني *"}
                           </Label>
                           <Input
                             id="email"
@@ -569,14 +640,14 @@ const Membership = () => {
                       {/* Address */}
                       <div className="space-y-2">
                         <Label htmlFor="streetAddress">
-                          Street Address / عنوان الشارع *
+                          {language === "ar" ? "عنوان الشارع *" : "Street Address / عنوان الشارع *"}
                         </Label>
                         <Input
                           id="streetAddress"
                           name="streetAddress"
                           value={formData.streetAddress}
                           onChange={handleChange}
-                          placeholder="123 Main Street"
+                          placeholder={language === "ar" ? "123 الشارع الرئيسي" : "123 Main Street"}
                           className={errors.streetAddress ? "border-destructive" : ""}
                         />
                         {errors.streetAddress && (
@@ -587,14 +658,14 @@ const Membership = () => {
                       <div className="grid sm:grid-cols-3 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="city">
-                            City / مدينة *
+                            {language === "ar" ? "المدينة *" : "City / مدينة *"}
                           </Label>
                           <Input
                             id="city"
                             name="city"
                             value={formData.city}
                             onChange={handleChange}
-                            placeholder="City"
+                            placeholder={language === "ar" ? "المدينة" : "City"}
                             className={errors.city ? "border-destructive" : ""}
                           />
                           {errors.city && (
@@ -603,19 +674,21 @@ const Membership = () => {
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="state">
-                            State / ولاية *
+                            {language === "ar" ? "الولاية *" : "State / ولاية *"}
                           </Label>
                           <Select
                             value={formData.state}
                             onValueChange={(value) => {
-                              setFormData(prev => ({ ...prev, state: value }));
+                              setFormData((prev) => ({ ...prev, state: value }));
                               if (errors.state) {
-                                setErrors(prev => ({ ...prev, state: "" }));
+                                setErrors((prev) => ({ ...prev, state: "" }));
                               }
                             }}
                           >
                             <SelectTrigger className={errors.state ? "border-destructive" : ""}>
-                              <SelectValue placeholder="Select state" />
+                              <SelectValue
+                                placeholder={language === "ar" ? "اختر الولاية" : "Select state"}
+                              />
                             </SelectTrigger>
                             <SelectContent className="bg-background">
                               {US_STATES.map((state) => (
@@ -631,7 +704,7 @@ const Membership = () => {
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="zipCode">
-                            ZIP Code / الرمز البريدي *
+                            {language === "ar" ? "الرمز البريدي *" : "ZIP Code / الرمز البريدي *"}
                           </Label>
                           <Input
                             id="zipCode"
@@ -647,110 +720,69 @@ const Membership = () => {
                         </div>
                       </div>
 
-                      {/* Household Members */}
-                      <div className="space-y-2">
-                        <Label htmlFor="householdMembers">
-                          Household Members (Names + DOBs) / يرجى إدراج جميع أفراد العائلة *
-                        </Label>
-                        <p className="text-xs text-muted-foreground mb-2">
-                          List all family members with their names and dates of birth
-                        </p>
-                        <Textarea
-                          id="householdMembers"
-                          name="householdMembers"
-                          value={formData.householdMembers}
-                          onChange={handleChange}
-                          placeholder="Example:&#10;Ahmad Khalil - 01/15/1985&#10;Sarah Khalil - 03/22/1988&#10;Omar Khalil - 07/10/2015"
-                          rows={5}
-                          className={errors.householdMembers ? "border-destructive" : ""}
-                        />
-                        {errors.householdMembers && (
-                          <p className="text-sm text-destructive">{errors.householdMembers}</p>
-                        )}
-                      </div>
-
-                      {/* College ID Upload - Improved Clarity */}
-                      <div className="space-y-3">
-                        <div className="p-4 rounded-lg bg-accent/30 border border-accent">
-                          <div className="flex items-start gap-3">
-                            <AlertCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                            <div>
-                              <Label className="text-base font-medium">
-                                {language === "ar" 
-                                  ? "تحميل هوية الكلية (لأفراد الأسرة من سن 18-21)" 
-                                  : "College ID Upload (For ages 18-21)"}
-                              </Label>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                {language === "ar"
-                                  ? "إذا كان أي فرد من أفراد الأسرة بعمر 18-21 ومسجل في الجامعة، يرجى تحميل هوية طالب صالحة للحصول على سعر الطالب ($50 بدلاً من $100)."
-                                  : "If any household member is between 18-21 and enrolled in college, please upload a valid student ID to qualify for the student rate ($50 instead of $100)."}
-                              </p>
-                            </div>
+                      {/* ===== HOUSEHOLD MEMBERS SECTION ===== */}
+                      <div className="space-y-4 pt-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="font-heading text-lg font-semibold text-foreground">
+                              {language === "ar" ? "أفراد الأسرة" : "Household Members"}
+                            </h3>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {language === "ar"
+                                ? "أضف جميع أفراد العائلة الإضافيين (بخلاف رب الأسرة)"
+                                : "Add all additional family members (besides Head of Household)"}
+                            </p>
                           </div>
                         </div>
-                        
-                        <div className="border-2 border-dashed border-border rounded-lg p-6 text-center bg-background">
-                          <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*,.pdf"
-                            multiple
-                            onChange={handleFileChange}
-                            className="hidden"
-                            id="college-id-upload"
-                          />
-                          <label
-                            htmlFor="college-id-upload"
-                            className="cursor-pointer flex flex-col items-center gap-3"
-                          >
-                            <div className="p-3 rounded-full bg-muted">
-                              <Upload className="h-6 w-6 text-muted-foreground" />
-                            </div>
-                            <div>
-                              <span className="text-sm font-medium text-foreground block">
-                                {language === "ar" ? "انقر لتحميل هوية الكلية" : "Click to upload college ID(s)"}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {language === "ar" 
-                                  ? "الحد الأقصى 5 ملفات، 10 ميجابايت لكل ملف"
-                                  : "Max 5 files, 10MB each • Images or PDF"}
-                              </span>
-                            </div>
-                          </label>
+
+                        {/* Member Rows */}
+                        <div className="space-y-4">
+                          {members.map((member, index) => (
+                            <HouseholdMemberRow
+                              key={member.id}
+                              member={member}
+                              index={index}
+                              onChange={updateMember}
+                              onRemove={removeMember}
+                              errors={errors}
+                              canRemove={members.length > 1}
+                            />
+                          ))}
                         </div>
-                        
-                        {files.length > 0 && (
-                          <ul className="space-y-2">
-                            {files.map((file, index) => (
-                              <li key={index} className="flex items-center justify-between bg-muted px-4 py-3 rounded-lg text-sm">
-                                <span className="truncate font-medium">{file.name}</span>
-                                <button
-                                  type="button"
-                                  onClick={() => removeFile(index)}
-                                  className="text-destructive hover:text-destructive/80 ml-2 p-1"
-                                >
-                                  <X className="h-4 w-4" />
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
+
+                        {/* Add Member Button */}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={addMember}
+                          className="w-full border-dashed border-2 hover:border-primary hover:bg-primary/5"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          {language === "ar" ? "+ إضافة فرد من العائلة" : "+ Add Family Member"}
+                        </Button>
+
+                        {/* Fee Summary */}
+                        <FeeSummary members={members} />
                       </div>
 
                       {/* Zelle Contact */}
                       <div className="space-y-2">
                         <Label htmlFor="zelleContact">
-                          Zelle Account Contact (Phone or Email) / لإتمام عملية الدفع *
+                          {language === "ar"
+                            ? "معلومات الاتصال بحساب Zelle (الهاتف أو البريد الإلكتروني) *"
+                            : "Zelle Account Contact (Phone or Email) / لإتمام عملية الدفع *"}
                         </Label>
                         <p className="text-xs text-muted-foreground mb-2">
-                          Enter the phone number or email associated with your Zelle account to receive a payment request
+                          {language === "ar"
+                            ? "أدخل رقم الهاتف أو البريد الإلكتروني المرتبط بحساب Zelle الخاص بك"
+                            : "Enter the phone number or email associated with your Zelle account to receive a payment request"}
                         </p>
                         <Input
                           id="zelleContact"
                           name="zelleContact"
                           value={formData.zelleContact}
                           onChange={handleChange}
-                          placeholder="Email or phone number"
+                          placeholder={language === "ar" ? "البريد الإلكتروني أو رقم الهاتف" : "Email or phone number"}
                           className={errors.zelleContact ? "border-destructive" : ""}
                         />
                         {errors.zelleContact && (
@@ -771,8 +803,11 @@ const Membership = () => {
                           }}
                           className={errors.acknowledged ? "border-destructive" : ""}
                         />
-                        <Label htmlFor="acknowledged" className="text-sm font-normal leading-relaxed cursor-pointer">
-                          {language === "ar" 
+                        <Label
+                          htmlFor="acknowledged"
+                          className="text-sm font-normal leading-relaxed cursor-pointer"
+                        >
+                          {language === "ar"
                             ? "أفهم أن عضويتي سيتم تفعيلها بعد التحقق اليدوي من الدفع عبر Zelle. سيرد أحد أعضاء الفريق خلال يومي عمل."
                             : "I understand that my membership will be activated after manual verification of payment via Zelle. A member of the team will respond within 2 business days."}
                         </Label>
@@ -791,9 +826,13 @@ const Membership = () => {
                           className="w-full btn-primary py-6 text-lg"
                           disabled={isSubmitting}
                         >
-                          {isSubmitting 
-                            ? (language === "ar" ? "جاري الإرسال..." : "Submitting...") 
-                            : (language === "ar" ? "إرسال نموذج العضوية" : "Submit Membership Form")}
+                          {isSubmitting
+                            ? language === "ar"
+                              ? "جاري الإرسال..."
+                              : "Submitting..."
+                            : language === "ar"
+                              ? "إرسال نموذج العضوية"
+                              : "Submit Membership Form"}
                         </Button>
                       </motion.div>
                     </form>
@@ -806,9 +845,13 @@ const Membership = () => {
           {/* FAQ Section */}
           {!isSubmitted && (
             <div className="mt-16">
-              <FAQ 
-                items={membershipFAQs} 
-                subtitle="Common questions about joining Beiteen Association"
+              <FAQ
+                items={membershipFAQs}
+                subtitle={
+                  language === "ar"
+                    ? "أسئلة شائعة حول الانضمام إلى جمعية بيتين"
+                    : "Common questions about joining Beiteen Association"
+                }
               />
             </div>
           )}
