@@ -26,6 +26,7 @@ import { DOBPicker } from "@/components/DOBPicker";
 import { sendNotificationEmail } from "@/lib/email-notifications";
 import { MembershipFees } from "@/components/MembershipFees";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 const ZELLE_EMAIL = "beiteenassociation.stl@gmail.com";
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -50,6 +51,7 @@ interface FormData {
 const Membership = () => {
   const { toast } = useToast();
   const { language, isRTL } = useLanguage();
+  usePageTitle(language === "ar" ? "تسجيل العضوية" : "Membership");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
@@ -770,8 +772,9 @@ const Membership = () => {
                           className={errors.acknowledged ? "border-destructive" : ""}
                         />
                         <Label htmlFor="acknowledged" className="text-sm font-normal leading-relaxed cursor-pointer">
-                          I understand that my membership will be activated after manual verification of payment via Zelle. 
-                          A member of the team will respond within 2 business days.
+                          {language === "ar" 
+                            ? "أفهم أن عضويتي سيتم تفعيلها بعد التحقق اليدوي من الدفع عبر Zelle. سيرد أحد أعضاء الفريق خلال يومي عمل."
+                            : "I understand that my membership will be activated after manual verification of payment via Zelle. A member of the team will respond within 2 business days."}
                         </Label>
                       </div>
                       {errors.acknowledged && (
@@ -788,7 +791,9 @@ const Membership = () => {
                           className="w-full btn-primary py-6 text-lg"
                           disabled={isSubmitting}
                         >
-                          {isSubmitting ? "Submitting..." : "Submit Membership Form"}
+                          {isSubmitting 
+                            ? (language === "ar" ? "جاري الإرسال..." : "Submitting...") 
+                            : (language === "ar" ? "إرسال نموذج العضوية" : "Submit Membership Form")}
                         </Button>
                       </motion.div>
                     </form>

@@ -2,9 +2,11 @@ import { User } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import { MotionSection, MotionCard } from "@/components/motion";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 const Board = () => {
   const { t, isRTL } = useLanguage();
+  usePageTitle(t("board.title"));
 
   const boardMembers = [
     { name: "Iyas Fares", titleKey: "board.roles.president" },

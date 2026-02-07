@@ -3,6 +3,7 @@ import Layout from "@/components/layout/Layout";
 import { MotionSection } from "@/components/motion";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 // Real gallery images
 import beiteen1991 from "@/assets/gallery/beiteen-1991.png";
@@ -77,6 +78,7 @@ const LazyImage = ({
 
 const Gallery = () => {
   const { t, isRTL } = useLanguage();
+  usePageTitle(t("gallery.title"));
 
   const galleryImages = [
     {

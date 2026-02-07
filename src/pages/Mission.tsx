@@ -4,10 +4,12 @@ import { MotionSection, MotionCard } from "@/components/motion";
 import { motion } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 const Mission = () => {
   const prefersReducedMotion = useReducedMotion();
   const { t, isRTL } = useLanguage();
+  usePageTitle(t("mission.title"));
 
   const ourWhy = [
     {

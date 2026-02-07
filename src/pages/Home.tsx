@@ -10,10 +10,12 @@ import { LatestUpdates } from "@/components/LatestUpdates";
 import { HowYouCanHelp } from "@/components/HowYouCanHelp";
 import ScrollIndicator from "@/components/ScrollIndicator";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 const Home = () => {
   const prefersReducedMotion = useReducedMotion();
   const { t, isRTL } = useLanguage();
+  usePageTitle();
 
   const coreValues = [
     {
