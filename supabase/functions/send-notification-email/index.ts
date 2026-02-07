@@ -1,29 +1,19 @@
 /**
  * send-notification-email — Beiteen Association Edge Function
  *
- * RESEND_API_KEY: Stored as a Lovable Cloud secret. Used to authenticate
- *   with the Resend API (https://resend.com).
- *
- * FROM address: "Beiteen Association <onboarding@resend.dev>"
- *   — For production, verify your domain at https://resend.com/domains
- *     then change to e.g. "Beiteen Association <noreply@beiteen.org>"
- *
- * TO:  beiteenassociation.STL@gmail.com
- * CC:  gktechnologies.stl@gmail.com (testing/admin copy)
- *
- * Domain verification (Resend):
- *   1. Go to https://resend.com/domains
- *   2. Add your domain (e.g. beiteen.org)
- *   3. Add the DNS records Resend provides (MX, SPF, DKIM)
- *   4. Once verified, update FROM address above
+ * RESEND_API_KEY: Stored as a Lovable Cloud secret.
+ * FROM: "Beiteen Association <no-reply@beiteen.com>" (verified domain)
+ * TO:   beiteenassociation.stl@gmail.com
  */
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
-// Recipients for all form submissions
-const NOTIFICATION_TO = "beiteenassociation.STL@gmail.com";
-const NOTIFICATION_CC = "gktechnologies.stl@gmail.com";
+// Recipient for all form submissions
+const NOTIFICATION_TO = "beiteenassociation.stl@gmail.com";
+
+// Verified sender domain
+const FROM_ADDRESS = "Beiteen Association <no-reply@beiteen.com>";
 
 // Logo URL - hosted publicly
 const LOGO_URL = "https://beiteen-community-connect.lovable.app/beiteen-logo.png";
@@ -74,7 +64,7 @@ const formatContactEmail = (data: Record<string, unknown>): { subject: string; h
   });
   
   return {
-    subject: `📩 New Contact Message from ${data.name || "Website Visitor"}`,
+    subject: `[Beiteen Website] Contact Form Submission — ${data.name || "Website Visitor"}`,
     replyTo: data.email ? String(data.email) : undefined,
     html: `
       <!DOCTYPE html>
@@ -280,7 +270,7 @@ const formatMembershipEmail = (data: Record<string, unknown>): { subject: string
   const estimatedFee = data.estimated_total_fee ? `$${data.estimated_total_fee}` : "N/A";
   
   return {
-    subject: `🎉 New Membership Application - ${data.full_name || "New Applicant"} (Est. ${estimatedFee})`,
+    subject: `[Beiteen Website] Membership Submission — ${data.full_name || "New Applicant"} (Est. ${estimatedFee})`,
     replyTo: data.email ? String(data.email) : undefined,
     html: `
       <!DOCTYPE html>
@@ -418,7 +408,7 @@ const formatDonationEmail = (data: Record<string, unknown>): { subject: string; 
   const donorName = data.is_anonymous ? "Anonymous Donor" : (data.name || "Generous Supporter");
   
   return {
-    subject: `💝 Donation Pledge: ${amount} from ${donorName}`,
+    subject: `[Beiteen Website] Donation Submission — ${amount} from ${donorName}`,
     replyTo: data.email ? String(data.email) : undefined,
     html: `
       <!DOCTYPE html>
@@ -563,9 +553,8 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const emailPayload: Record<string, unknown> = {
-      from: "Beiteen Association <onboarding@resend.dev>",
+      from: FROM_ADDRESS,
       to: [NOTIFICATION_TO],
-      cc: [NOTIFICATION_CC],
       subject: emailContent.subject,
       html: emailContent.html,
     };
@@ -575,10 +564,10 @@ const handler = async (req: Request): Promise<Response> => {
       emailPayload.reply_to = emailContent.replyTo;
     }
 
-    console.log(`Sending ${formType} email — TO: ${NOTIFICATION_TO}, CC: ${NOTIFICATION_CC}`);
+    console.log(`Sending ${formType} email — TO: ${NOTIFICATION_TO}`);
     console.log("Reply-To:", emailContent.replyTo || "None");
 
-    let emailResponse = await fetch("https://api.resend.com/emails", {
+    const emailResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
@@ -587,43 +576,11 @@ const handler = async (req: Request): Promise<Response> => {
       body: JSON.stringify(emailPayload),
     });
 
-    let emailResult = await emailResponse.json();
+    const emailResult = await emailResponse.json();
     
     if (!emailResponse.ok) {
-      const isVerificationIssue = emailResult.message?.includes("verify") || emailResult.message?.includes("domain") || emailResult.statusCode === 403;
-      
-      if (isVerificationIssue) {
-        console.warn("⚠️ Domain not verified. Falling back to send only to verified account email:", NOTIFICATION_CC);
-        
-        // Retry sending only to the verified account email
-        const fallbackPayload = {
-          ...emailPayload,
-          to: [NOTIFICATION_CC],
-          cc: undefined,
-          subject: `[FALLBACK] ${emailContent.subject}`,
-        };
-        
-        emailResponse = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${RESEND_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(fallbackPayload),
-        });
-        
-        emailResult = await emailResponse.json();
-        
-        if (!emailResponse.ok) {
-          console.error("Resend API fallback error:", JSON.stringify(emailResult));
-          throw new Error(emailResult.message || `Email delivery failed with status ${emailResponse.status}`);
-        }
-        
-        console.log("✅ Fallback email sent to verified address:", NOTIFICATION_CC);
-      } else {
-        console.error("Resend API error:", JSON.stringify(emailResult));
-        throw new Error(emailResult.message || `Email delivery failed with status ${emailResponse.status}`);
-      }
+      console.error("Resend API error:", JSON.stringify(emailResult));
+      throw new Error(emailResult.message || `Email delivery failed with status ${emailResponse.status}`);
     }
 
     console.log("✅ Email sent successfully:", emailResult);
