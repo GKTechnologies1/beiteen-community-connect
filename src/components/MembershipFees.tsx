@@ -1,9 +1,18 @@
-import { DollarSign, Users, GraduationCap, Home, Info } from "lucide-react";
+import { useState } from "react";
+import { DollarSign, Users, GraduationCap, Home, Info, Minus, Plus, Calculator } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { MotionCard } from "@/components/motion";
+import { Button } from "@/components/ui/button";
 
 export const MembershipFees = () => {
   const { language, isRTL } = useLanguage();
+  const [adult21PlusCount, setAdult21PlusCount] = useState(0);
+  const [collegeStudentCount, setCollegeStudentCount] = useState(0);
+
+  const householdBase = 200;
+  const adult21PlusTotal = adult21PlusCount * 100;
+  const collegeStudentTotal = collegeStudentCount * 50;
+  const totalDue = householdBase + adult21PlusTotal + collegeStudentTotal;
 
   const fees = [
     {
@@ -104,15 +113,174 @@ export const MembershipFees = () => {
           <p className="text-sm text-foreground">
             {language === "ar" ? (
               <>
-                <strong>ملاحظة:</strong> تكتمل عضويتك بعد إجراء الدفع عبر Zelle.
-                سيتم إرسال بريد إلكتروني للتأكيد بعد تقديم هذا النموذج.
+                <strong>ملاحظة:</strong> تكتمل العضوية بعد استلام الدفع عبر Zelle.
               </>
             ) : (
               <>
-                <strong>Note:</strong> Your membership is complete after payment is made via Zelle.
-                A confirmation email will be sent after this form is submitted.
+                <strong>Note:</strong> Membership is complete after payment is received via Zelle.
               </>
             )}
+          </p>
+        </div>
+      </MotionCard>
+
+      {/* Fee Calculator */}
+      <MotionCard className="card-heritage p-6 md:p-8">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 rounded-full bg-primary/10">
+            <Calculator className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-heading text-xl font-semibold text-foreground">
+              {language === "ar" ? "حاسبة رسوم العضوية" : "Membership Fee Calculator"}
+            </h3>
+            <p className="text-sm text-muted-foreground" dir={isRTL ? "rtl" : "ltr"}>
+              {language === "ar"
+                ? "احسب رسوم عضويتك المقدرة"
+                : "Estimate your membership fee before filling out the form"}
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-5">
+          {/* Household Base (always included) */}
+          <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border border-border" dir={isRTL ? "rtl" : "ltr"}>
+            <div className="flex items-center gap-3">
+              <Home className="h-5 w-5 text-primary flex-shrink-0" />
+              <div>
+                <p className="font-medium text-foreground text-sm">
+                  {language === "ar" ? "رسوم الأسرة الأساسية" : "Household Base Fee"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {language === "ar" ? "مشمولة دائماً" : "Always included"}
+                </p>
+              </div>
+            </div>
+            <span className="font-bold text-primary text-lg">$200</span>
+          </div>
+
+          {/* 21+ Member Stepper */}
+          <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border border-border" dir={isRTL ? "rtl" : "ltr"}>
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <Users className="h-5 w-5 text-primary flex-shrink-0" />
+              <div className="min-w-0">
+                <p className="font-medium text-foreground text-sm">
+                  {language === "ar"
+                    ? "أفراد إضافيون 21+ (ليس في الجامعة)"
+                    : "# of additional members 21+ (not in college)"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {language === "ar" ? "$100 لكل فرد" : "$100 each"}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 rounded-full"
+                onClick={() => setAdult21PlusCount((c) => Math.max(0, c - 1))}
+                disabled={adult21PlusCount === 0}
+              >
+                <Minus className="h-3.5 w-3.5" />
+              </Button>
+              <span className="w-8 text-center font-bold text-foreground text-lg">{adult21PlusCount}</span>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 rounded-full"
+                onClick={() => setAdult21PlusCount((c) => c + 1)}
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
+
+          {/* College Student Stepper */}
+          <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border border-border" dir={isRTL ? "rtl" : "ltr"}>
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <GraduationCap className="h-5 w-5 text-primary flex-shrink-0" />
+              <div className="min-w-0">
+                <p className="font-medium text-foreground text-sm">
+                  {language === "ar"
+                    ? "طلاب جامعيون (18-21)"
+                    : "# of college students (18–21)"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {language === "ar" ? "$50 لكل طالب (يتطلب هوية طالب)" : "$50 each (valid student ID required)"}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 rounded-full"
+                onClick={() => setCollegeStudentCount((c) => Math.max(0, c - 1))}
+                disabled={collegeStudentCount === 0}
+              >
+                <Minus className="h-3.5 w-3.5" />
+              </Button>
+              <span className="w-8 text-center font-bold text-foreground text-lg">{collegeStudentCount}</span>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-8 w-8 rounded-full"
+                onClick={() => setCollegeStudentCount((c) => c + 1)}
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Live Total */}
+          <div className="rounded-xl border-2 border-primary/30 bg-primary/5 p-5">
+            <div className="space-y-2">
+              {adult21PlusCount > 0 && (
+                <div className="flex justify-between text-sm" dir={isRTL ? "rtl" : "ltr"}>
+                  <span className="text-muted-foreground">
+                    {language === "ar"
+                      ? `أفراد 21+ (ليس في الجامعة): ${adult21PlusCount} × $100`
+                      : `Additional 21+ (Not in College): ${adult21PlusCount} × $100`}
+                  </span>
+                  <span className="font-medium text-foreground">${adult21PlusTotal}</span>
+                </div>
+              )}
+              {collegeStudentCount > 0 && (
+                <div className="flex justify-between text-sm" dir={isRTL ? "rtl" : "ltr"}>
+                  <span className="text-muted-foreground">
+                    {language === "ar"
+                      ? `طلاب جامعيون: ${collegeStudentCount} × $50`
+                      : `College Students: ${collegeStudentCount} × $50`}
+                  </span>
+                  <span className="font-medium text-foreground">${collegeStudentTotal}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm" dir={isRTL ? "rtl" : "ltr"}>
+                <span className="text-muted-foreground">
+                  {language === "ar" ? "رسوم الأسرة الأساسية" : "Household Base"}
+                </span>
+                <span className="font-medium text-foreground">${householdBase}</span>
+              </div>
+              <div className="border-t border-primary/20 pt-3 mt-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-foreground text-base">
+                    {language === "ar" ? "إجمالي المبلغ المستحق" : "Total Due"}
+                  </span>
+                  <span className="text-2xl font-bold text-primary">${totalDue}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-xs text-muted-foreground bg-background/50 p-3 rounded-lg" dir={isRTL ? "rtl" : "ltr"}>
+            {language === "ar"
+              ? "تكتمل العضوية بعد استلام الدفع عبر Zelle."
+              : "Membership is complete after payment is received via Zelle."}
           </p>
         </div>
       </MotionCard>
