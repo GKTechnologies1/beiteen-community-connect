@@ -59,7 +59,7 @@ const Membership = () => {
   usePageTitle(language === "ar" ? "تسجيل العضوية" : "Membership");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [members, setMembers] = useState<HouseholdMember[]>([createEmptyMember()]);
+  const [members, setMembers] = useState<HouseholdMember[]>([]);
 
   const [formData, setFormData] = useState<FormData>({
     familyName: "",
@@ -164,30 +164,32 @@ const Membership = () => {
       newErrors.acknowledged = language === "ar" ? "يرجى الموافقة على عملية الدفع" : "Please acknowledge the payment process";
     }
 
-    // Validate each household member
-    for (const member of members) {
-      const prefix = `member_${member.id}`;
+    // Validate each household member (only if rows exist)
+    if (members.length > 0) {
+      for (const member of members) {
+        const prefix = `member_${member.id}`;
 
-      if (!member.fullName.trim()) {
-        newErrors[`${prefix}_fullName`] = language === "ar" ? "الاسم الكامل مطلوب" : "Full name is required";
-      }
+        if (!member.fullName.trim()) {
+          newErrors[`${prefix}_fullName`] = language === "ar" ? "الاسم الكامل مطلوب" : "Full name is required";
+        }
 
-      if (!member.relationship) {
-        newErrors[`${prefix}_relationship`] = language === "ar" ? "صلة القرابة مطلوبة" : "Relationship is required";
-      }
+        if (!member.relationship) {
+          newErrors[`${prefix}_relationship`] = language === "ar" ? "صلة القرابة مطلوبة" : "Relationship is required";
+        }
 
-      if (member.relationship === "other" && !member.otherRelationship.trim()) {
-        newErrors[`${prefix}_otherRelationship`] = language === "ar" ? "يرجى تحديد صلة القرابة" : "Please specify the relationship";
-      }
+        if (member.relationship === "other" && !member.otherRelationship.trim()) {
+          newErrors[`${prefix}_otherRelationship`] = language === "ar" ? "يرجى تحديد صلة القرابة" : "Please specify the relationship";
+        }
 
-      if (!member.dob) {
-        newErrors[`${prefix}_dob`] = language === "ar" ? "تاريخ الميلاد مطلوب" : "Date of birth is required";
-      }
+        if (!member.dob) {
+          newErrors[`${prefix}_dob`] = language === "ar" ? "تاريخ الميلاد مطلوب" : "Date of birth is required";
+        }
 
-      if (member.isCollegeStudent && member.collegeFiles.length === 0) {
-        newErrors[`${prefix}_collegeFiles`] = language === "ar"
-          ? "يرجى تحميل هوية طالب صالحة"
-          : "Please upload a valid student ID";
+        if (member.isCollegeStudent && member.collegeFiles.length === 0) {
+          newErrors[`${prefix}_collegeFiles`] = language === "ar"
+            ? "يرجى تحميل هوية طالب صالحة"
+            : "Please upload a valid student ID";
+        }
       }
     }
 
@@ -341,7 +343,7 @@ const Membership = () => {
       zelleContact: "",
       acknowledged: false,
     });
-    setMembers([createEmptyMember()]);
+    setMembers([]);
     setIsSubmitted(false);
     setErrors({});
   };
@@ -736,33 +738,33 @@ const Membership = () => {
 
                       {/* ===== HOUSEHOLD MEMBERS SECTION ===== */}
                       <div className="space-y-4 pt-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h3 className="font-heading text-lg font-semibold text-foreground">
-                              {language === "ar" ? "أفراد الأسرة" : "Household Members"}
-                            </h3>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {language === "ar"
-                                ? "أضف جميع أفراد العائلة الإضافيين (بخلاف رب الأسرة)"
-                                : "Add all additional family members (besides Head of Household)"}
-                            </p>
-                          </div>
+                        <div>
+                          <h3 className="font-heading text-lg font-semibold text-foreground">
+                            {language === "ar" ? "أفراد الأسرة (اختياري)" : "Household Members (Optional)"}
+                          </h3>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {language === "ar"
+                              ? "أضف أفراد الأسرة (اختياري). فقط الأفراد المؤهلون بموجب قواعد الرسوم سيزيدون الإجمالي."
+                              : "Add household members (optional). Only members who qualify under the fee rules will increase the total."}
+                          </p>
                         </div>
 
                         {/* Member Rows */}
-                        <div className="space-y-4">
-                          {members.map((member, index) => (
-                            <HouseholdMemberRow
-                              key={member.id}
-                              member={member}
-                              index={index}
-                              onChange={updateMember}
-                              onRemove={removeMember}
-                              errors={errors}
-                              canRemove={members.length > 1}
-                            />
-                          ))}
-                        </div>
+                        {members.length > 0 && (
+                          <div className="space-y-4">
+                            {members.map((member, index) => (
+                              <HouseholdMemberRow
+                                key={member.id}
+                                member={member}
+                                index={index}
+                                onChange={updateMember}
+                                onRemove={removeMember}
+                                errors={errors}
+                                canRemove={true}
+                              />
+                            ))}
+                          </div>
+                        )}
 
                         {/* Add Member Button */}
                         <Button
@@ -772,7 +774,7 @@ const Membership = () => {
                           className="w-full border-dashed border-2 hover:border-primary hover:bg-primary/5"
                         >
                           <Plus className="h-4 w-4 mr-2" />
-                          {language === "ar" ? "+ إضافة فرد من العائلة" : "+ Add Family Member"}
+                          {language === "ar" ? "+ إضافة فرد من العائلة (اختياري)" : "+ Add Family Member (Optional)"}
                         </Button>
 
                         {/* Fee Summary */}
