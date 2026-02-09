@@ -17,6 +17,7 @@ import { TransparencyBlock } from "@/components/TransparencyBlock";
 import { sendNotificationEmail } from "@/lib/email-notifications";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { useMetaTags } from "@/hooks/useMetaTags";
 import { isValidEmail, isValidUSPhone, formatPhoneForStorage } from "@/lib/validation";
 import { PhoneInput } from "@/components/PhoneInput";
 
@@ -25,7 +26,12 @@ const ZELLE_EMAIL = "beiteenassociation.stl@gmail.com";
 const Donations = () => {
   const { toast } = useToast();
   const { t, isRTL, language } = useLanguage();
-  usePageTitle(t("donate.title"));
+  usePageTitle("Donate", "Support the Beiteen Association with a tax-deductible donation. Your contribution funds community events, cultural preservation, and youth programs.");
+  useMetaTags({
+    title: "Donate | Beiteen Association U.S.A.",
+    description: "Support the Beiteen Association with a tax-deductible donation. Your contribution funds community events, cultural preservation, and youth programs.",
+    path: "/donations",
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({

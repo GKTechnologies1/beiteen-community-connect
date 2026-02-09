@@ -26,6 +26,7 @@ import { sendNotificationEmail } from "@/lib/email-notifications";
 import { MembershipFees } from "@/components/MembershipFees";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { useMetaTags } from "@/hooks/useMetaTags";
 import { HouseholdMember, createEmptyMember } from "@/components/membership/types";
 import { HouseholdMemberRow } from "@/components/membership/HouseholdMemberRow";
 import { FeeSummary } from "@/components/membership/FeeSummary";
@@ -56,7 +57,12 @@ interface FormData {
 const Membership = () => {
   const { toast } = useToast();
   const { language, isRTL } = useLanguage();
-  usePageTitle(language === "ar" ? "تسجيل العضوية" : "Membership");
+  usePageTitle("Membership", "Join the Beiteen Association U.S.A. Household-based membership supports community programs, cultural events, and youth development.");
+  useMetaTags({
+    title: "Membership | Beiteen Association U.S.A.",
+    description: "Join the Beiteen Association U.S.A. Household-based membership supports community programs, cultural events, and youth development.",
+    path: "/membership",
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [members, setMembers] = useState<HouseholdMember[]>([]);

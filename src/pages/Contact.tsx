@@ -14,13 +14,19 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { SocialLinks } from "@/components/SocialLinks";
 import { sendNotificationEmail } from "@/lib/email-notifications";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { useMetaTags } from "@/hooks/useMetaTags";
 import { isValidEmail, isValidUSPhone, formatPhoneForStorage } from "@/lib/validation";
 import { PhoneInput } from "@/components/PhoneInput";
 
 const Contact = () => {
   const { toast } = useToast();
   const { t, isRTL, language } = useLanguage();
-  usePageTitle(t("contact.title"));
+  usePageTitle("Contact Us", "Get in touch with the Beiteen Association U.S.A. in St. Louis. Reach out for membership inquiries, event details, or community support.");
+  useMetaTags({
+    title: "Contact Us | Beiteen Association U.S.A.",
+    description: "Get in touch with the Beiteen Association U.S.A. in St. Louis. Reach out for membership inquiries, event details, or community support.",
+    path: "/contact",
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({

@@ -12,3 +12,8 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://beiteen-community-connect.lovable.app/sitemap.xml
+
+Disallow: /api/
+Disallow: /functions/

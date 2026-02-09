@@ -3,10 +3,16 @@ import Layout from "@/components/layout/Layout";
 import { MotionSection, MotionCard } from "@/components/motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { useMetaTags } from "@/hooks/useMetaTags";
 
 const Board = () => {
   const { t, isRTL } = useLanguage();
-  usePageTitle(t("board.title"));
+  usePageTitle("Board of Directors", "Meet the dedicated volunteer board members leading the Beiteen Association U.S.A. and serving the St. Louis community.");
+  useMetaTags({
+    title: "Board of Directors | Beiteen Association U.S.A.",
+    description: "Meet the dedicated volunteer board members leading the Beiteen Association U.S.A. and serving the St. Louis community.",
+    path: "/board",
+  });
 
   const boardMembers = [
     { name: "Iyas Fares", titleKey: "board.roles.president" },
