@@ -33,8 +33,8 @@ const translations: Record<string, Record<Language, string>> = {
   "home.hero.title1": { en: "Building Community,", ar: "بناء المجتمع،" },
   "home.hero.title2": { en: "Preserving Heritage", ar: "الحفاظ على التراث" },
   "home.hero.description": { 
-    en: "The Beiteen Association U.S.A. connects families and preserves our rich cultural heritage through charitable programs, educational initiatives, and community events.", 
-    ar: "تربط جمعية بيتين في الولايات المتحدة العائلات وتحافظ على تراثنا الثقافي الغني من خلال البرامج الخيرية والمبادرات التعليمية والفعاليات المجتمعية."
+    en: "The Beiteen Association U.S.A. connects families and preserves our rich cultural heritage through charitable programs, career development initiatives, and community events.", 
+    ar: "تربط جمعية بيتين في الولايات المتحدة العائلات وتحافظ على تراثنا الثقافي الغني من خلال البرامج الخيرية ومبادرات التطوير المهني والفعاليات المجتمعية."
   },
   "home.hero.missionBtn": { en: "Our Mission", ar: "رسالتنا" },
   "home.hero.contactBtn": { en: "Get In Touch", ar: "تواصل معنا" },
@@ -45,7 +45,7 @@ const translations: Record<string, Record<Language, string>> = {
   "home.values.charitable.title": { en: "Charitable", ar: "خيري" },
   "home.values.charitable.desc": { en: "Supporting those in need within our community through various assistance programs.", ar: "دعم المحتاجين في مجتمعنا من خلال برامج مساعدة متنوعة." },
   "home.values.educational.title": { en: "Educational", ar: "تعليمي" },
-  "home.values.educational.desc": { en: "Fostering learning and growth through scholarships and educational initiatives.", ar: "تعزيز التعلم والنمو من خلال المنح الدراسية والمبادرات التعليمية." },
+  "home.values.educational.desc": { en: "Empowering individuals through career guidance, mentorship, and skills development programs.", ar: "تمكين الأفراد من خلال التوجيه المهني والإرشاد وبرامج تطوير المهارات." },
   "home.values.cultural.title": { en: "Cultural", ar: "ثقافي" },
   "home.values.cultural.desc": { en: "Preserving and celebrating our rich Palestinian heritage and traditions.", ar: "الحفاظ على تراثنا الفلسطيني الغني وتقاليدنا والاحتفاء بها." },
   "home.values.social.title": { en: "Social", ar: "اجتماعي" },
@@ -57,7 +57,7 @@ const translations: Record<string, Record<Language, string>> = {
   "home.serve.families.title": { en: "Families of Beiteen", ar: "عائلات بيتين" },
   "home.serve.families.desc": { en: "Descendants and relatives of the village of Beiteen, connecting our extended family.", ar: "أحفاد وأقارب قرية بيتين، نربط عائلتنا الممتدة." },
   "home.serve.youth.title": { en: "Youth & Future Generations", ar: "الشباب والأجيال القادمة" },
-  "home.serve.youth.desc": { en: "Young people learning about their heritage and building connections for the future.", ar: "الشباب الذين يتعلمون عن تراثهم ويبنون روابط للمستقبل." },
+  "home.serve.youth.desc": { en: "Young people developing career skills, building professional networks, and connecting with their heritage.", ar: "الشباب الذين يطورون مهاراتهم المهنية ويبنون شبكات احترافية ويتواصلون مع تراثهم." },
   "home.serve.elders.title": { en: "Elders & Heritage Keepers", ar: "كبار السن وحراس التراث" },
   "home.serve.elders.desc": { en: "Those who preserve our stories, traditions, and cultural knowledge.", ar: "أولئك الذين يحافظون على قصصنا وتقاليدنا ومعرفتنا الثقافية." },
   "home.serve.community.title": { en: "Community Near & Far", ar: "المجتمع قريباً وبعيداً" },
@@ -68,8 +68,8 @@ const translations: Record<string, Record<Language, string>> = {
   "home.whatWeDo.subtitle": { en: "Through our programs and initiatives, we strengthen bonds within our community while giving back to those in need.", ar: "من خلال برامجنا ومبادراتنا، نعزز الروابط داخل مجتمعنا مع رد الجميل للمحتاجين." },
   "home.whatWeDo.gatherings.title": { en: "Community Gatherings & Cultural Events", ar: "التجمعات المجتمعية والفعاليات الثقافية" },
   "home.whatWeDo.gatherings.desc": { en: "Regular events including Ramadan iftars, Eid celebrations, and family gatherings.", ar: "فعاليات منتظمة تشمل إفطارات رمضان واحتفالات العيد والتجمعات العائلية." },
-  "home.whatWeDo.education.title": { en: "Educational & Youth Programs", ar: "البرامج التعليمية والشبابية" },
-  "home.whatWeDo.education.desc": { en: "Supporting scholarships and educational opportunities for young community members.", ar: "دعم المنح الدراسية والفرص التعليمية لأعضاء المجتمع الشباب." },
+  "home.whatWeDo.education.title": { en: "Career Development & Youth Programs", ar: "التطوير المهني وبرامج الشباب" },
+  "home.whatWeDo.education.desc": { en: "Empowering youth and adults through career planning, mock interviews, resume building, and mentorship programs.", ar: "تمكين الشباب والبالغين من خلال التخطيط المهني والمقابلات التجريبية وبناء السيرة الذاتية وبرامج الإرشاد." },
   "home.whatWeDo.humanitarian.title": { en: "Humanitarian Initiatives", ar: "المبادرات الإنسانية" },
   "home.whatWeDo.humanitarian.desc": { en: "Charitable programs supporting families in need locally and abroad.", ar: "برامج خيرية تدعم العائلات المحتاجة محلياً وخارجياً." },
   "home.whatWeDo.preservation.title": { en: "Cultural Preservation", ar: "الحفاظ على الثقافة" },
@@ -99,7 +99,7 @@ const translations: Record<string, Record<Language, string>> = {
 
   // Volunteer CTA
   "home.volunteer.title": { en: "Volunteer With Us", ar: "تطوع معنا" },
-  "home.volunteer.desc": { en: "Looking for ways to contribute beyond financial support? We welcome volunteers who can help with event planning, youth mentoring, cultural programming, and more. Your time and talents make a real difference in our community.", ar: "تبحث عن طرق للمساهمة بما يتجاوز الدعم المالي؟ نرحب بالمتطوعين الذين يمكنهم المساعدة في تخطيط الفعاليات وإرشاد الشباب والبرمجة الثقافية وغيرها. وقتك ومواهبك تحدث فرقاً حقيقياً في مجتمعنا." },
+  "home.volunteer.desc": { en: "Looking for ways to contribute beyond financial support? We welcome volunteers who can help with event planning, youth mentoring, career coaching, mock interviews, and more. Your time and expertise make a real difference in our community.", ar: "تبحث عن طرق للمساهمة بما يتجاوز الدعم المالي؟ نرحب بالمتطوعين الذين يمكنهم المساعدة في تخطيط الفعاليات وإرشاد الشباب والتدريب المهني والمقابلات التجريبية وغيرها. وقتك وخبراتك تحدث فرقاً حقيقياً في مجتمعنا." },
   "home.volunteer.btn": { en: "Get Involved", ar: "شارك معنا" },
 
   // Join CTA
@@ -126,14 +126,14 @@ const translations: Record<string, Record<Language, string>> = {
   "mission.why.unity.title": { en: "Multi-Generational Unity", ar: "وحدة متعددة الأجيال" },
   "mission.why.unity.desc": { en: "From our elders who carry wisdom to our youth who carry the future, we create spaces where all generations come together to learn, share, and grow.", ar: "من كبار السن الذين يحملون الحكمة إلى شبابنا الذين يحملون المستقبل، نخلق مساحات حيث تجتمع جميع الأجيال للتعلم والمشاركة والنمو." },
   "mission.why.ties.title": { en: "Rebuilding Community Ties", ar: "إعادة بناء روابط المجتمع" },
-  "mission.why.ties.desc": { en: "Through cultural events, educational programs, and community gatherings, we rebuild and strengthen the connections that make our community thrive.", ar: "من خلال الفعاليات الثقافية والبرامج التعليمية والتجمعات المجتمعية، نعيد بناء ونعزز الروابط التي تجعل مجتمعنا يزدهر." },
+  "mission.why.ties.desc": { en: "Through cultural events, career development programs, and community gatherings, we rebuild and strengthen the connections that make our community thrive.", ar: "من خلال الفعاليات الثقافية وبرامج التطوير المهني والتجمعات المجتمعية، نعيد بناء ونعزز الروابط التي تجعل مجتمعنا يزدهر." },
   "mission.pillars.title": { en: "Our Four Pillars", ar: "ركائزنا الأربع" },
   "mission.pillars.charitable.title": { en: "Charitable", ar: "خيري" },
   "mission.pillars.charitable.desc": { en: "We provide assistance and support to community members in need, ensuring no one faces hardship alone.", ar: "نقدم المساعدة والدعم لأفراد المجتمع المحتاجين، ونضمن ألا يواجه أحد الصعوبات وحده." },
   "mission.pillars.cultural.title": { en: "Cultural", ar: "ثقافي" },
-  "mission.pillars.cultural.desc": { en: "We preserve and celebrate our Palestinian heritage through events, traditions, and educational programs.", ar: "نحافظ على تراثنا الفلسطيني ونحتفي به من خلال الفعاليات والتقاليد والبرامج التعليمية." },
+  "mission.pillars.cultural.desc": { en: "We preserve and celebrate our Palestinian heritage through events, traditions, and community programs.", ar: "نحافظ على تراثنا الفلسطيني ونحتفي به من خلال الفعاليات والتقاليد والبرامج المجتمعية." },
   "mission.pillars.educational.title": { en: "Educational", ar: "تعليمي" },
-  "mission.pillars.educational.desc": { en: "We invest in the education and development of our youth, providing resources and opportunities for growth.", ar: "نستثمر في تعليم وتطوير شبابنا، ونوفر الموارد والفرص للنمو." },
+  "mission.pillars.educational.desc": { en: "We invest in the professional development of our youth through career guidance, interview preparation, resume workshops, and mentorship opportunities.", ar: "نستثمر في التطوير المهني لشبابنا من خلال التوجيه المهني والتحضير للمقابلات وورش بناء السيرة الذاتية وفرص الإرشاد." },
   "mission.pillars.social.title": { en: "Social", ar: "اجتماعي" },
   "mission.pillars.social.desc": { en: "We create meaningful opportunities for families and individuals to connect, celebrate, and support one another.", ar: "نخلق فرصاً هادفة للعائلات والأفراد للتواصل والاحتفال ودعم بعضهم البعض." },
 
