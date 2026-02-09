@@ -744,8 +744,8 @@ const Membership = () => {
                           </h3>
                           <p className="text-xs text-muted-foreground mt-1">
                             {language === "ar"
-                              ? "أضف أفراد الأسرة (اختياري). فقط الأفراد المؤهلون بموجب قواعد الرسوم سيزيدون الإجمالي."
-                              : "Add household members (optional). Only members who qualify under the fee rules will increase the total."}
+                              ? "أضف أفراد الأسرة الإضافيين إن وجدوا. الرسوم تطبق فقط بناءً على العمر وحالة الالتحاق بالجامعة. الزوج/الزوجة مشمول في رسوم الأسرة ولا يترتب عليه رسوم إضافية."
+                              : "Add additional household members if applicable. Fees only apply based on age and college enrollment status. Spouse is included in the household fee and does not incur an additional charge."}
                           </p>
                         </div>
 

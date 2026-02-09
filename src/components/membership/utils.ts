@@ -12,8 +12,17 @@ export const calculateAge = (dob: Date): number => {
 
 export const getFeeCategory = (
   age: number,
-  isCollegeStudent: boolean
+  isCollegeStudent: boolean,
+  relationship?: string
 ): { labelEn: string; labelAr: string; fee: number } => {
+  // Spouse is always included in the base household fee
+  if (relationship === "husband_wife") {
+    return {
+      labelEn: "Spouse – Included",
+      labelAr: "الزوج/الزوجة – مشمول",
+      fee: 0,
+    };
+  }
   if (age >= 21 && !isCollegeStudent) {
     return {
       labelEn: "21+ (Not in College) – $100",
@@ -50,7 +59,7 @@ export const calculateTotalFee = (members: HouseholdMember[]): FeeBreakdown => {
   for (const member of members) {
     if (!member.dob) continue;
     const age = calculateAge(member.dob);
-    const category = getFeeCategory(age, member.isCollegeStudent);
+    const category = getFeeCategory(age, member.isCollegeStudent, member.relationship);
     if (category.fee === 100) {
       adult21Plus += 100;
       adult21PlusCount++;
@@ -105,7 +114,7 @@ export const serializeMembersForEmail = (
       : "N/A";
     const category =
       typeof age === "number"
-        ? getFeeCategory(age, m.isCollegeStudent)
+        ? getFeeCategory(age, m.isCollegeStudent, m.relationship)
         : { labelEn: "N/A", fee: 0 };
 
     return {

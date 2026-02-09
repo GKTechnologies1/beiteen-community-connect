@@ -42,8 +42,9 @@ export const HouseholdMemberRow = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const age = member.dob ? calculateAge(member.dob) : null;
-  const showCollegeToggle = age !== null && age >= 18 && age <= 20;
-  const feeCategory = age !== null ? getFeeCategory(age, member.isCollegeStudent) : null;
+  const isSpouse = member.relationship === "husband_wife";
+  const showCollegeToggle = age !== null && age >= 18 && age <= 20 && !isSpouse;
+  const feeCategory = age !== null ? getFeeCategory(age, member.isCollegeStudent, member.relationship) : null;
 
   const errorPrefix = `member_${member.id}`;
 
@@ -132,8 +133,14 @@ export const HouseholdMemberRow = ({
           <Select
             value={member.relationship}
             onValueChange={(val) => {
-              onChange(member.id, { relationship: val });
-              if (val !== "other") onChange(member.id, { relationship: val, otherRelationship: "" });
+              const updates: Partial<HouseholdMember> = { relationship: val };
+              if (val !== "other") updates.otherRelationship = "";
+              // If spouse selected, reset college student status since spouse is always included
+              if (val === "husband_wife") {
+                updates.isCollegeStudent = false;
+                updates.collegeFiles = [];
+              }
+              onChange(member.id, updates);
             }}
           >
             <SelectTrigger
