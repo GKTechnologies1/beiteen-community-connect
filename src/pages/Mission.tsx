@@ -5,11 +5,17 @@ import { motion } from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { useMetaTags } from "@/hooks/useMetaTags";
 
 const Mission = () => {
   const prefersReducedMotion = useReducedMotion();
   const { t, isRTL } = useLanguage();
-  usePageTitle(t("mission.title"));
+  usePageTitle("Our Mission", "Learn about the Beiteen Association's mission to unite families, preserve Palestinian heritage, and strengthen the St. Louis community.");
+  useMetaTags({
+    title: "Our Mission | Beiteen Association U.S.A.",
+    description: "Learn about the Beiteen Association's mission to unite families, preserve Palestinian heritage, and strengthen the St. Louis community.",
+    path: "/mission",
+  });
 
   const ourWhy = [
     {

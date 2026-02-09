@@ -4,6 +4,7 @@ import { MotionSection } from "@/components/motion";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { useMetaTags } from "@/hooks/useMetaTags";
 
 // Real gallery images
 import beiteen1991 from "@/assets/gallery/beiteen-1991.png";
@@ -78,7 +79,12 @@ const LazyImage = ({
 
 const Gallery = () => {
   const { t, isRTL } = useLanguage();
-  usePageTitle(t("gallery.title"));
+  usePageTitle("Gallery", "Browse photos from Beiteen Association events, community gatherings, cultural celebrations, and historic moments in St. Louis.");
+  useMetaTags({
+    title: "Gallery | Beiteen Association U.S.A.",
+    description: "Browse photos from Beiteen Association events, community gatherings, cultural celebrations, and historic moments in St. Louis.",
+    path: "/gallery",
+  });
 
   const galleryImages = [
     {

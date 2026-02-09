@@ -11,11 +11,20 @@ import { HowYouCanHelp } from "@/components/HowYouCanHelp";
 import ScrollIndicator from "@/components/ScrollIndicator";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { useMetaTags } from "@/hooks/useMetaTags";
 
 const Home = () => {
   const prefersReducedMotion = useReducedMotion();
   const { t, isRTL } = useLanguage();
-  usePageTitle();
+  usePageTitle(
+    "Beiteen Association | Community, Culture & Heritage in St. Louis",
+    "The Beiteen Association of Saint Louis connects families, preserves cultural heritage, and supports community initiatives and events."
+  );
+  useMetaTags({
+    title: "Beiteen Association | Community, Culture & Heritage in St. Louis",
+    description: "The Beiteen Association of Saint Louis connects families, preserves cultural heritage, and supports community initiatives and events.",
+    path: "/",
+  });
 
   const coreValues = [
     {

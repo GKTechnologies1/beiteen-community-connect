@@ -3,6 +3,7 @@ import Layout from "@/components/layout/Layout";
 import { MotionSection } from "@/components/motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { useMetaTags } from "@/hooks/useMetaTags";
 
 // Full bylaws content structure (English only - legal document)
 const bylawsContent = [
@@ -159,7 +160,12 @@ Amendments shall take effect immediately upon adoption unless otherwise specifie
 
 const Bylaws = () => {
   const { t, isRTL } = useLanguage();
-  usePageTitle(t("bylaws.title"));
+  usePageTitle("Bylaws", "Read the official bylaws of the Beiteen Association U.S.A., a 501(c)(3) nonprofit serving the St. Louis Palestinian community.");
+  useMetaTags({
+    title: "Bylaws | Beiteen Association U.S.A.",
+    description: "Read the official bylaws of the Beiteen Association U.S.A., a 501(c)(3) nonprofit serving the St. Louis Palestinian community.",
+    path: "/bylaws",
+  });
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
