@@ -7,8 +7,6 @@
  */
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
-RESEND_API_KEY="re_81inmMXx_9W6v1iramwa7CsRwZwQ2LmH6"
-
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
 // Recipient for all form submissions
